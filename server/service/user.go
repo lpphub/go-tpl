@@ -1,9 +1,9 @@
 package service
 
 import (
-	"go-tpl/internal/domain/entity"
-	"go-tpl/internal/domain/repo"
-	"go-tpl/pkg/pagination"
+	"go-tpl/ext/pagination"
+	"go-tpl/server/domain/entity"
+	"go-tpl/server/domain/repo"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"

@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"go-tpl/internal/domain/entity"
-	"go-tpl/pkg/pagination"
+	"go-tpl/ext/pagination"
+	"go-tpl/server/domain/entity"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

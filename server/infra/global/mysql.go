@@ -2,7 +2,7 @@ package global
 
 import (
 	"fmt"
-	"go-tpl/pkg/ext/logext"
+	"go-tpl/ext/logext"
 	"time"
 
 	"gorm.io/driver/mysql"

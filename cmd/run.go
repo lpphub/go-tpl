@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"go-tpl/internal"
+	"go-tpl/server"
 
 	"github.com/spf13/cobra"
 )
@@ -11,7 +11,7 @@ func Execute() {
 		Use:   "main",
 		Short: "Main Function",
 		Run: func(cmd *cobra.Command, args []string) {
-			internal.Serve()
+			server.Serve()
 		},
 	}
 

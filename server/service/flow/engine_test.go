@@ -3,7 +3,7 @@ package flow
 import (
 	"context"
 	"fmt"
-	"go-tpl/internal/infra/global"
+	"go-tpl/server/infra/global"
 	"testing"
 )
 

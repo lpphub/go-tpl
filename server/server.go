@@ -1,11 +1,11 @@
-package internal
+package server
 
 import (
 	"fmt"
-	"go-tpl/internal/api"
-	"go-tpl/internal/common/errs"
-	"go-tpl/internal/infra/global"
-	"go-tpl/pkg/ext"
+	"go-tpl/ext"
+	"go-tpl/server/api"
+	"go-tpl/server/common/errs"
+	"go-tpl/server/infra/global"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

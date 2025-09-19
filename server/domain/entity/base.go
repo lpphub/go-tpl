@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"go-tpl/pkg/ext"
+	"go-tpl/ext"
 )
 
 type BaseModel struct {

@@ -2,7 +2,7 @@ package global
 
 import (
 	"context"
-	"go-tpl/pkg/ext/logext"
+	"go-tpl/ext/logext"
 	"time"
 
 	"github.com/redis/go-redis/v9"

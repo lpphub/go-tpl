@@ -1,4 +1,4 @@
-package util
+package fnutil
 
 import (
 	"errors"

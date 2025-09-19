@@ -1,7 +1,7 @@
 package global
 
 import (
-	"go-tpl/internal/infra/conf"
+	"go-tpl/server/infra/conf"
 
 	"github.com/lpphub/golib/env"
 	"github.com/lpphub/golib/logger"
