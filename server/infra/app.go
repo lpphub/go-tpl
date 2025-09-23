@@ -5,6 +5,9 @@ import (
 	"go-tpl/server/domain/repo"
 	"go-tpl/server/infra/global"
 	"go-tpl/server/service"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type AppContext struct {
@@ -14,9 +17,9 @@ type AppContext struct {
 // InitAppContext 初始化应用上下文
 func InitAppContext() *AppContext {
 	// init repo
-	repoApp := initRepoContainer()
+	repoApp := initRepoContainer(global.DB)
 	// init service
-	svcApp := initServiceContainer(repoApp)
+	svcApp := initServiceContainer(repoApp, global.Redis)
 
 	return &AppContext{
 		User: handler.NewUserHandler(svcApp.UserSvc),
@@ -31,14 +34,14 @@ type repoContainer struct {
 	UserRepo *repo.UserRepo
 }
 
-func initRepoContainer() *repoContainer {
+func initRepoContainer(db *gorm.DB) *repoContainer {
 	return &repoContainer{
-		UserRepo: repo.NewUserRepo(global.DB),
+		UserRepo: repo.NewUserRepo(db),
 	}
 }
 
-func initServiceContainer(repo *repoContainer) *serviceContainer {
+func initServiceContainer(repo *repoContainer, redis *redis.Client) *serviceContainer {
 	return &serviceContainer{
-		UserSvc: service.NewUserService(repo.UserRepo, global.Redis),
+		UserSvc: service.NewUserService(repo.UserRepo, redis),
 	}
 }
