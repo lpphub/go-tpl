@@ -10,4 +10,4 @@ redis:
   db: 0
 
 log:
-  path: ./log/app.log
+  path: ./logger/web.logger

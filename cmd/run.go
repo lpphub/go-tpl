@@ -1,21 +1,28 @@
-package cmd
+package main
 
 import (
-	"go-tpl/server"
-
-	"github.com/spf13/cobra"
+	"go-tpl/infra"
+	"go-tpl/infra/monitor"
+	"go-tpl/logic"
+	"go-tpl/web"
+	"log"
 )
 
-func Execute() {
-	var rootCmd = &cobra.Command{
-		Use:   "main",
-		Short: "Main Function",
-		Run: func(cmd *cobra.Command, args []string) {
-			server.Serve()
-		},
-	}
+func main() {
+	// 1.初始化基础配置
+	infra.Init()
+	// 2.初始化逻辑层
+	logic.Init()
 
-	if err := rootCmd.Execute(); err != nil {
-		panic(err.Error())
+	// 3.启动服务
+	app := web.SetupRouter()
+
+	// 4.启动监控服务
+	monitor.SetupMetrics(app)
+	//monitor.SetupPprof()
+
+	err := app.Run(":8080")
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }
