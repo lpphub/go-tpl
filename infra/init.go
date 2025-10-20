@@ -7,15 +7,13 @@ import (
 	"go-tpl/infra/logger"
 
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 var (
-	Cfg    *config.Config
-	Logger *zap.Logger
-	DB     *gorm.DB
-	Redis  *redis.Client
+	Cfg   *config.Config
+	DB    *gorm.DB
+	Redis *redis.Client
 )
 
 func Init() {
@@ -26,8 +24,8 @@ func Init() {
 		panic(fmt.Sprintf("Failed to load config: %v", err))
 	}
 
-	// 2.初始化日志
-	Logger = logger.NewLogger("")
+	// 2.配置日志
+	logger.Setup()
 
 	// 3.初始化数据库和Redis
 	DB, err = dbs.NewMysqlDB(Cfg.Database)

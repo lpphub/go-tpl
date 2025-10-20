@@ -2,7 +2,7 @@ package logx
 
 import (
 	"context"
-	"go-tpl/infra"
+	"go-tpl/infra/logger"
 	"strconv"
 	"sync"
 	"time"
@@ -12,17 +12,12 @@ import (
 )
 
 const (
-	GinHeaderLogId = "X-Trace-logID"
-)
-
-type (
-	keyLogger struct{}
-	keyLogID  struct{}
+	GinHeaderLogID = "X-Trace-LogID"
 )
 
 var (
-	logGinKey keyLogger
-	logIDKey  keyLogID
+	ctxKeyLogID struct{}
+	ctxKeyLog   struct{}
 
 	once  sync.Once
 	sugar *zap.SugaredLogger
@@ -30,42 +25,61 @@ var (
 
 func getLogger() *zap.SugaredLogger {
 	once.Do(func() {
-		sugar = infra.Logger.Sugar()
+		sugar = logger.GetLogger().Sugar()
 	})
 	return sugar
 }
 
-func getLoggerFromContext(c context.Context) *zap.SugaredLogger {
-	if gCtx, isOk := c.(*gin.Context); isOk {
-		if t, exist := gCtx.Get(logGinKey); exist {
+// 从任意 Context 获取 Logger
+func getLoggerFromContext(ctx context.Context) *zap.SugaredLogger {
+	if ctx == nil {
+		return getLogger()
+	}
+
+	// 如果是 Gin context
+	if gCtx, gOk := ctx.(*gin.Context); gOk {
+		if t, exist := gCtx.Get(ctxKeyLog); exist {
 			if s, ok := t.(*zap.SugaredLogger); ok {
 				return s
 			}
 		}
-		sLog := sugar.With(zap.String("logId", getLogID(gCtx)))
-		gCtx.Set(logGinKey, sLog)
-		return sLog
+		log := getLogger().With(zap.String("logId", getLogIDFromGin(gCtx)))
+		gCtx.Set(ctxKeyLog, log)
+		return log
 	}
 
-	return getLogger()
+	// 标准 context - 没有缓存，创建新的
+	return getLogger().With(zap.String("logId", getLogIDFromContext(ctx)))
 }
 
-func getLogID(ctx *gin.Context) string {
+func getLogIDFromContext(ctx context.Context) string {
 	if ctx == nil {
 		return generateLogID()
 	}
-	if logId := ctx.GetString(logIDKey); logId != "" {
+
+	if logID, ok := ctx.Value(ctxKeyLogID).(string); ok {
+		return logID
+	}
+
+	return generateLogID()
+}
+
+func getLogIDFromGin(ctx *gin.Context) string {
+	if ctx == nil {
+		return generateLogID()
+	}
+	if logId := ctx.GetString(ctxKeyLogID); logId != "" {
 		return logId
 	}
 	// 尝试从header中获取
 	var logId string
 	if ctx.Request != nil && ctx.Request.Header != nil {
-		logId = ctx.GetHeader(GinHeaderLogId)
+		logId = ctx.GetHeader(GinHeaderLogID)
 	}
 	if logId == "" {
 		logId = generateLogID()
 	}
-	ctx.Set(logIDKey, logId)
+	ctx.Set(ctxKeyLogID, logId)
 	return logId
 }
 
@@ -73,27 +87,41 @@ func generateLogID() string {
 	return strconv.FormatUint(uint64(time.Now().UnixNano())&0x7FFFFFFF|0x80000000, 10)
 }
 
+// 统一的日志函数
+
+func WithLogID(ctx context.Context) context.Context {
+	logID := getLogIDFromContext(ctx)
+	return context.WithValue(ctx, ctxKeyLogID, logID)
+}
+
 func Info(ctx context.Context, msg string) {
 	getLoggerFromContext(ctx).Info(msg)
 }
+
 func Infof(ctx context.Context, format string, args ...interface{}) {
 	getLoggerFromContext(ctx).Infof(format, args...)
 }
+
 func Error(ctx context.Context, msg string) {
 	getLoggerFromContext(ctx).Error(msg)
 }
+
 func Errorf(ctx context.Context, format string, args ...interface{}) {
 	getLoggerFromContext(ctx).Errorf(format, args...)
 }
+
 func Debug(ctx context.Context, msg string) {
 	getLoggerFromContext(ctx).Debug(msg)
 }
+
 func Debugf(ctx context.Context, format string, args ...interface{}) {
 	getLoggerFromContext(ctx).Debugf(format, args...)
 }
+
 func Warn(ctx context.Context, msg string) {
 	getLoggerFromContext(ctx).Warn(msg)
 }
+
 func Warnf(ctx context.Context, format string, args ...interface{}) {
 	getLoggerFromContext(ctx).Warnf(format, args...)
 }
