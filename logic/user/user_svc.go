@@ -2,23 +2,26 @@ package user
 
 import (
 	"context"
-	"go-tpl/logic/base"
+	"go-tpl/logic/shared"
 	"go-tpl/web/types"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-type UserService struct {
-	db *gorm.DB
+type Service struct {
+	db    *gorm.DB
+	redis *redis.Client
 }
 
-func NewUserService(db *gorm.DB) *UserService {
-	return &UserService{
-		db: db,
+func NewService(db *gorm.DB, redis *redis.Client) *Service {
+	return &Service{
+		db:    db,
+		redis: redis,
 	}
 }
 
-func (s *UserService) List(ctx context.Context, req types.UserQueryReq) (*base.PageData[User], error) {
+func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.PageData[User], error) {
 	var (
 		total int64
 		list  []User
@@ -32,9 +35,9 @@ func (s *UserService) List(ctx context.Context, req types.UserQueryReq) (*base.P
 		return nil, err
 	}
 	if total > 0 {
-		if err := _db.Scopes(base.Paginate(req.Pagination)).Find(&list).Error; err != nil {
+		if err := _db.Scopes(shared.Paginate(req.Pagination)).Find(&list).Error; err != nil {
 			return nil, err
 		}
 	}
-	return base.Wrapper[User](total, list), nil
+	return shared.Wrapper[User](total, list), nil
 }

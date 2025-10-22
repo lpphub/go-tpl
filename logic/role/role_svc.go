@@ -2,22 +2,22 @@ package role
 
 import (
 	"context"
-	"go-tpl/logic/base"
+	"go-tpl/logic/shared"
 
 	"gorm.io/gorm"
 )
 
-type RoleService struct {
+type Service struct {
 	db *gorm.DB
 }
 
-func NewRoleService(db *gorm.DB) *RoleService {
-	return &RoleService{
+func NewService(db *gorm.DB) *Service {
+	return &Service{
 		db: db,
 	}
 }
 
-func (s *RoleService) List(ctx context.Context, page base.Pagination) (*base.PageData[Role], error) {
+func (s *Service) List(ctx context.Context, page shared.Pagination) (*shared.PageData[Role], error) {
 	var (
 		total int64
 		list  []Role
@@ -27,9 +27,9 @@ func (s *RoleService) List(ctx context.Context, page base.Pagination) (*base.Pag
 		return nil, err
 	}
 	if total > 0 {
-		if err := _db.Scopes(base.Paginate(page)).Find(&list).Error; err != nil {
+		if err := _db.Scopes(shared.Paginate(page)).Find(&list).Error; err != nil {
 			return nil, err
 		}
 	}
-	return base.Wrapper[Role](total, list), nil
+	return shared.Wrapper[Role](total, list), nil
 }

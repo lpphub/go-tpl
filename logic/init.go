@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	UserSvc *user.UserService
-	RoleSvc *role.RoleService
+	UserSvc *user.Service
+	RoleSvc *role.Service
 )
 
 func Init() {
-	UserSvc = user.NewUserService(infra.DB)
-	RoleSvc = role.NewRoleService(infra.DB)
+	UserSvc = user.NewService(infra.DB, infra.Redis)
+	RoleSvc = role.NewService(infra.DB)
 }

@@ -1,4 +1,4 @@
-package base
+package shared
 
 const (
 	CacheUserInfo = "user:%d"

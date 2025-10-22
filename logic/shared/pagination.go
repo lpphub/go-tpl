@@ -1,4 +1,4 @@
-package base
+package shared
 
 import "gorm.io/gorm"
 

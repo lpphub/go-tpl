@@ -23,8 +23,8 @@ func List(c *gin.Context) {
 	base.OKWithData(c, data)
 }
 
-// GetByID 根据ID获取用户
+// GetByID 根据ID获取
 func GetByID(c *gin.Context) {
-	// todo 获取用户
+	// todo 获取
 	base.OKWithData(c, nil)
 }

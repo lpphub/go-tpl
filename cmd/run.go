@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// 1.初始化基础配置
+	// 1.初始化基础设施
 	infra.Init()
 	// 2.初始化逻辑层
 	logic.Init()

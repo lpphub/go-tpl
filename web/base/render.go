@@ -2,7 +2,7 @@ package base
 
 import (
 	"errors"
-	"go-tpl/logic/base"
+	"go-tpl/logic/shared"
 	"go-tpl/web/types"
 	"net/http"
 
@@ -39,7 +39,7 @@ func FailWithError(ctx *gin.Context, code int, err error) {
 }
 
 func FailWithErr(ctx *gin.Context, err error) {
-	var e base.Error
+	var e shared.Error
 	if ok := errors.As(err, &e); ok {
 		Fail(ctx, e.Code, e.Error())
 	} else {

@@ -1,4 +1,4 @@
-package base
+package shared
 
 var (
 	ErrServerError = NewError(-1, "server internal error")

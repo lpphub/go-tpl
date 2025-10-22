@@ -2,6 +2,7 @@ package web
 
 import (
 	"go-tpl/web/rest"
+	"go-tpl/web/rest/permission"
 	"go-tpl/web/rest/role"
 	"go-tpl/web/rest/user"
 
@@ -15,14 +16,12 @@ func SetupRouter() *gin.Engine {
 
 	// 公共路由
 	api.GET("/test", rest.Test)
-
 	api.POST("/register", rest.Register)
 	api.POST("/login", rest.Login)
 
-	//
-	//// 注册接口路由
+	// 注册接口处理器
 	user.Register(api)
 	role.Register(api)
-	//permission.Register(api)
+	permission.Register(api)
 	return r
 }

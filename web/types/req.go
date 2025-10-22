@@ -1,12 +1,12 @@
 package types
 
-import "go-tpl/logic/base"
+import "go-tpl/logic/shared"
 
 type UserQueryReq struct {
-	base.Pagination
+	shared.Pagination
 	Username string `json:"username"`
 }
 
 type RoleQueryReq struct {
-	base.Pagination
+	shared.Pagination
 }
