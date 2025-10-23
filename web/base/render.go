@@ -43,7 +43,7 @@ func FailWithErr(ctx *gin.Context, err error) {
 	if ok := errors.As(err, &e); ok {
 		Fail(ctx, e.Code, e.Error())
 	} else {
-		FailWithError(ctx, http.StatusInternalServerError, err)
+		FailWithError(ctx, shared.ErrServerError.Code, err)
 	}
 }
 
