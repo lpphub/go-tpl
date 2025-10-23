@@ -8,26 +8,10 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type options struct {
-	logFile string
-}
-
-type Option func(*options)
-
-func WithLogFile(logFile string) Option {
-	return func(o *options) {
-		o.logFile = logFile
-	}
-}
-
 var logger *zap.Logger
 
-func Setup(opts ...Option) {
-	o := &options{}
-	for _, opt := range opts {
-		opt(o)
-	}
-	logger = newZapLogger(o.logFile)
+func setupLogger(logFile string) {
+	logger = newZapLogger(logFile)
 }
 
 func GetLogger() *zap.Logger {

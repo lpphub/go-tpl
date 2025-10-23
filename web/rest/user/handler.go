@@ -1,7 +1,7 @@
 package user
 
 import (
-	"go-tpl/infra/logger/logx"
+	"go-tpl/infra/logger/logc"
 	"go-tpl/logic"
 	"go-tpl/web/base"
 	"go-tpl/web/types"
@@ -15,14 +15,14 @@ import (
 func List(c *gin.Context) {
 	var req types.UserQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	data, err := logic.UserSvc.List(c.Request.Context(), req)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to get user list: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to get user list: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -34,14 +34,14 @@ func List(c *gin.Context) {
 func Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	user, err := logic.UserSvc.Get(c.Request.Context(), uint(id))
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to get user: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to get user: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -53,19 +53,19 @@ func Get(c *gin.Context) {
 func Create(c *gin.Context) {
 	var req types.CreateUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	user, err := logic.UserSvc.Create(c.Request.Context(), req)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to create user: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to create user: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logx.Infof(c.Request.Context(), "User created successfully: %d", user.ID)
+	logc.Infof(c.Request.Context(), "User created successfully: %d", user.ID)
 	base.OKWithData(c, user)
 }
 
@@ -73,26 +73,26 @@ func Create(c *gin.Context) {
 func Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	var req types.UpdateUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	err = logic.UserSvc.Update(c.Request.Context(), uint(id), req)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to update user: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to update user: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logx.Infof(c.Request.Context(), "User updated successfully: %d", id)
+	logc.Infof(c.Request.Context(), "User updated successfully: %d", id)
 	base.OK(c)
 }
 
@@ -100,19 +100,19 @@ func Update(c *gin.Context) {
 func Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	err = logic.UserSvc.Delete(c.Request.Context(), uint(id))
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to delete user: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to delete user: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logx.Infof(c.Request.Context(), "User deleted successfully: %d", id)
+	logc.Infof(c.Request.Context(), "User deleted successfully: %d", id)
 	base.OK(c)
 }
 
@@ -120,26 +120,26 @@ func Delete(c *gin.Context) {
 func UpdateStatus(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	var req types.UpdateStatusReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	err = logic.UserSvc.UpdateStatus(c.Request.Context(), uint(id), req.Status)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to update user status: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to update user status: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logx.Infof(c.Request.Context(), "User status updated successfully: %d, status: %d", id, req.Status)
+	logc.Infof(c.Request.Context(), "User status updated successfully: %d, status: %d", id, req.Status)
 	base.OK(c)
 }
 
@@ -147,14 +147,14 @@ func UpdateStatus(c *gin.Context) {
 func GetUserRoles(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	roleIds, err := logic.UserSvc.GetUserRoles(c.Request.Context(), uint(id))
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to get user roles: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to get user roles: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -166,25 +166,25 @@ func GetUserRoles(c *gin.Context) {
 func AssignRoles(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid user id: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid user id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	var req types.AssignUserRolesReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logx.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	err = logic.UserSvc.AssignRoles(c.Request.Context(), uint(id), req.RoleIds)
 	if err != nil {
-		logx.Errorf(c.Request.Context(), "Failed to assign roles: %v", err)
+		logc.Errorf(c.Request.Context(), "Failed to assign roles: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logx.Infof(c.Request.Context(), "User roles assigned successfully: %d, roles: %v", id, req.RoleIds)
+	logc.Infof(c.Request.Context(), "User roles assigned successfully: %d, roles: %v", id, req.RoleIds)
 	base.OK(c)
 }
