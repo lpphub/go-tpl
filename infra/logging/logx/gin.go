@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"context"
 	"go-tpl/infra/logging"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,14 @@ const (
 	GinHeaderLogID = "X-Trace-LogID"
 )
 
+func init() {
+	logging.RegisterCtxExtractor(func(ctx context.Context) context.Context {
+		if gCtx, ok := ctx.(*gin.Context); ok {
+			return gCtx.Request.Context()
+		}
+		return nil
+	})
+}
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logCtx := logging.WithLogID(c.Request.Context(), getLogIDFromGin(c))

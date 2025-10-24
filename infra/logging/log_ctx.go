@@ -3,10 +3,6 @@ package logging
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 type LogContext struct {
@@ -18,6 +14,14 @@ type LogContext struct {
 
 func (l *LogContext) log(level LogLevel, msg string) {
 	l.Logger.Write(level, msg, l.Fields...)
+}
+
+type logCtxExtractor func(ctx context.Context) context.Context
+
+var ctxExtractors []logCtxExtractor
+
+func RegisterCtxExtractor(ce func(ctx context.Context) context.Context) {
+	ctxExtractors = append(ctxExtractors, ce)
 }
 
 func WithContext(ctx context.Context) *LogContext {
@@ -38,18 +42,16 @@ func WithLogID(ctx context.Context, logID string) *LogContext {
 	return logCtx
 }
 
-func GenerateLogID() string {
-	return strconv.FormatUint(uint64(time.Now().UnixNano())&0x7FFFFFFF|0x80000000, 10)
-}
-
 func getLoggerFromCtx(ctx context.Context) *LogContext {
 	if ctx == nil {
 		return WithContext(context.TODO())
 	}
 
-	// Gin context
-	if gCtx, ok := ctx.(*gin.Context); ok {
-		ctx = gCtx.Request.Context()
+	// 兼容注册的context extractor，比如gin.Context
+	for _, fn := range ctxExtractors {
+		if gCtx := fn(ctx); gCtx != nil {
+			ctx = gCtx
+		}
 	}
 
 	if logCtx, ok := ctx.(*LogContext); ok {
