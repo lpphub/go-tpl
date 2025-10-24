@@ -1,7 +1,7 @@
 package permission
 
 import (
-	"go-tpl/infra/logger/logc"
+	"go-tpl/infra/logging"
 	"go-tpl/logic"
 	"go-tpl/web/base"
 	"go-tpl/web/types"
@@ -15,14 +15,14 @@ import (
 func List(c *gin.Context) {
 	var req types.PermissionQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logging.Errorf(c, "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	data, err := logic.PermissionSvc.List(c.Request.Context(), req)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to get permission list: %v", err)
+		logging.Errorf(c, "Failed to get permission list: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -34,14 +34,14 @@ func List(c *gin.Context) {
 func Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid permission id: %v", err)
+		logging.Errorf(c, "Invalid permission id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	permission, err := logic.PermissionSvc.Get(c.Request.Context(), uint(id))
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to get permission: %v", err)
+		logging.Errorf(c, "Failed to get permission: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -53,19 +53,19 @@ func Get(c *gin.Context) {
 func Create(c *gin.Context) {
 	var req types.CreatePermissionReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logging.Errorf(c, "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	permission, err := logic.PermissionSvc.Create(c.Request.Context(), req)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to create permission: %v", err)
+		logging.Errorf(c, "Failed to create permission: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logc.Infof(c.Request.Context(), "Permission created successfully: %d", permission.ID)
+	logging.Infof(c, "Permission created successfully: %d", permission.ID)
 	base.OKWithData(c, permission)
 }
 
@@ -73,26 +73,26 @@ func Create(c *gin.Context) {
 func Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid permission id: %v", err)
+		logging.Errorf(c, "Invalid permission id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	var req types.UpdatePermissionReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logging.Errorf(c, "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
-	err = logic.PermissionSvc.Update(c.Request.Context(), uint(id), req)
+	err = logic.PermissionSvc.Update(c, uint(id), req)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to update permission: %v", err)
+		logging.Errorf(c, "Failed to update permission: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logc.Infof(c.Request.Context(), "Permission updated successfully: %d", id)
+	logging.Infof(c, "Permission updated successfully: %d", id)
 	base.OK(c)
 }
 
@@ -100,19 +100,19 @@ func Update(c *gin.Context) {
 func Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid permission id: %v", err)
+		logging.Errorf(c, "Invalid permission id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
-	err = logic.PermissionSvc.Delete(c.Request.Context(), uint(id))
+	err = logic.PermissionSvc.Delete(c, uint(id))
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to delete permission: %v", err)
+		logging.Errorf(c, "Failed to delete permission: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logc.Infof(c.Request.Context(), "Permission deleted successfully: %d", id)
+	logging.Infof(c, "Permission deleted successfully: %d", id)
 	base.OK(c)
 }
 
@@ -120,34 +120,34 @@ func Delete(c *gin.Context) {
 func UpdateStatus(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid permission id: %v", err)
+		logging.Errorf(c, "Invalid permission id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
 	var req types.UpdateStatusReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid request: %v", err)
+		logging.Errorf(c, "Invalid request: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
-	err = logic.PermissionSvc.UpdateStatus(c.Request.Context(), uint(id), req.Status)
+	err = logic.PermissionSvc.UpdateStatus(c, uint(id), req.Status)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to update permission status: %v", err)
+		logging.Errorf(c, "Failed to update permission status: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
 
-	logc.Infof(c.Request.Context(), "Permission status updated successfully: %d, status: %d", id, req.Status)
+	logging.Infof(c, "Permission status updated successfully: %d, status: %d", id, req.Status)
 	base.OK(c)
 }
 
 // GetModules 获取所有模块列表
 func GetModules(c *gin.Context) {
-	modules, err := logic.PermissionSvc.GetModules(c.Request.Context())
+	modules, err := logic.PermissionSvc.GetModules(c)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to get modules: %v", err)
+		logging.Errorf(c, "Failed to get modules: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}
@@ -159,14 +159,14 @@ func GetModules(c *gin.Context) {
 func GetPermissionRoles(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Invalid permission id: %v", err)
+		logging.Errorf(c, "Invalid permission id: %v", err)
 		base.Fail(c, http.StatusBadRequest, "参数错误")
 		return
 	}
 
-	roleIds, err := logic.PermissionSvc.GetPermissionRoles(c.Request.Context(), uint(id))
+	roleIds, err := logic.PermissionSvc.GetPermissionRoles(c, uint(id))
 	if err != nil {
-		logc.Errorf(c.Request.Context(), "Failed to get permission roles: %v", err)
+		logging.Errorf(c, "Failed to get permission roles: %v", err)
 		base.FailWithErr(c, err)
 		return
 	}

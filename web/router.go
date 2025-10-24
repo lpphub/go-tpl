@@ -1,7 +1,7 @@
 package web
 
 import (
-	"go-tpl/infra/logger/logc"
+	"go-tpl/infra/logging/logx"
 	"go-tpl/web/rest"
 	"go-tpl/web/rest/permission"
 	"go-tpl/web/rest/role"
@@ -13,7 +13,7 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	r.Use(logc.GinLogMiddleware())
+	r.Use(logx.GinLogMiddleware())
 
 	api := r.Group("/api")
 

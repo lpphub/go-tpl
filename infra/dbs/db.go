@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/config"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
@@ -19,19 +20,25 @@ func NewMysqlDB(cfg config.DBConfig) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// todo 连接池
+	pool, _ := db.DB()
+	pool.SetMaxIdleConns(2)
+	pool.SetMaxOpenConns(10)
+	pool.SetConnMaxIdleTime(5 * time.Minute)
+	pool.SetConnMaxLifetime(30 * time.Minute)
 
 	return db, nil
 }
 
 func NewRedis(cfg config.RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
-		Password: cfg.Password,
-		DB:       cfg.DB,
+		Addr:            fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Password:        cfg.Password,
+		DB:              cfg.DB,
+		MinIdleConns:    1,
+		MaxActiveConns:  10,
+		ConnMaxIdleTime: 3 * time.Minute,
+		ConnMaxLifetime: 10 * time.Minute,
 	})
-
-	// todo 连接池
 
 	if err := client.Ping(context.TODO()).Err(); err != nil {
 		return nil, err
