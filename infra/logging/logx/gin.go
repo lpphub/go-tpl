@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	GinHeaderLogID = "X-Trace-LogID"
+	LogIDHeader = "X-Trace-LogID"
 )
 
 func init() {
@@ -33,7 +33,7 @@ func getLogIDFromGin(ctx *gin.Context) string {
 	// 尝试从header中获取
 	var logId string
 	if ctx.Request != nil && ctx.Request.Header != nil {
-		logId = ctx.GetHeader(GinHeaderLogID)
+		logId = ctx.GetHeader(LogIDHeader)
 	}
 
 	if logId == "" {
