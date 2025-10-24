@@ -223,3 +223,26 @@ func (s *Service) AssignRoles(ctx context.Context, userId uint, roleIds []uint) 
 		return nil
 	})
 }
+
+// ValidateLogin 验证用户登录
+func (s *Service) ValidateLogin(ctx context.Context, username, password string) (*User, error) {
+	var user User
+	if err := s.db.WithContext(ctx).Where("username = ?", username).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, shared.NewError(2104, "用户名或密码错误")
+		}
+		return nil, err
+	}
+
+	// 检查用户状态
+	if user.Status != shared.StatusActive {
+		return nil, shared.NewError(2105, "用户已被禁用")
+	}
+
+	// 验证密码
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, shared.NewError(2104, "用户名或密码错误")
+	}
+
+	return &user, nil
+}

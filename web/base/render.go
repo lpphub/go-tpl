@@ -31,19 +31,19 @@ func Fail(ctx *gin.Context, code int, msg string) {
 	})
 }
 
-func FailWithError(ctx *gin.Context, code int, err error) {
+func FailWithErr(ctx *gin.Context, code int, err error) {
 	ctx.AbortWithStatusJSON(http.StatusOK, types.Resp{
 		Code: code,
 		Msg:  err.Error(),
 	})
 }
 
-func FailWithErr(ctx *gin.Context, err error) {
+func FailWithError(ctx *gin.Context, err error) {
 	var e shared.Error
 	if ok := errors.As(err, &e); ok {
 		Fail(ctx, e.Code, e.Error())
 	} else {
-		FailWithError(ctx, shared.ErrServerError.Code, err)
+		FailWithErr(ctx, shared.ErrServerError.Code, err)
 	}
 }
 

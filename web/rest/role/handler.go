@@ -3,9 +3,9 @@ package role
 import (
 	"go-tpl/infra/logging"
 	"go-tpl/logic"
+	"go-tpl/logic/shared"
 	"go-tpl/web/base"
 	"go-tpl/web/types"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,14 +16,14 @@ func List(c *gin.Context) {
 	var req types.RoleQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	data, err := logic.RoleSvc.List(c.Request.Context(), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to get role list: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -35,14 +35,14 @@ func Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	role, err := logic.RoleSvc.Get(c.Request.Context(), uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -54,14 +54,14 @@ func Create(c *gin.Context) {
 	var req types.CreateRoleReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	role, err := logic.RoleSvc.Create(c.Request.Context(), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to create role: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -74,21 +74,21 @@ func Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.UpdateRoleReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.RoleSvc.Update(c.Request.Context(), uint(id), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to update role: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -101,14 +101,14 @@ func Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.RoleSvc.Delete(c.Request.Context(), uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to delete role: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -121,21 +121,21 @@ func UpdateStatus(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.UpdateStatusReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.RoleSvc.UpdateStatus(c.Request.Context(), uint(id), req.Status)
 	if err != nil {
 		logging.Errorf(c, "Failed to update role status: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -148,14 +148,14 @@ func GetRolePermissions(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	permissionIds, err := logic.RoleSvc.GetRolePermissions(c.Request.Context(), uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role permissions: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -167,21 +167,21 @@ func AssignPermissions(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.AssignRolePermissionsReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.RoleSvc.AssignPermissions(c.Request.Context(), uint(id), req.PermissionIds)
 	if err != nil {
 		logging.Errorf(c, "Failed to assign permissions: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 
@@ -194,14 +194,14 @@ func GetRoleUsers(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		logging.Errorf(c, "Invalid role id: %v", err)
-		base.Fail(c, http.StatusBadRequest, "参数错误")
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	userIds, err := logic.RoleSvc.GetRoleUsers(c.Request.Context(), uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role users: %v", err)
-		base.FailWithErr(c, err)
+		base.FailWithError(c, err)
 		return
 	}
 

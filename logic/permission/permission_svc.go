@@ -101,7 +101,7 @@ func (s *Service) Update(ctx context.Context, id uint, req types.UpdatePermissio
 	if req.Code != "" && req.Code != permission.Code {
 		// 检查权限代码是否已存在
 		var count int64
-		if err := s.db.WithContext(ctx).Model(&Permission{}).Where("code = ? AND id != ?", req.Code, id).Count(&count).Error; err != nil {
+		if err = s.db.WithContext(ctx).Model(&Permission{}).Where("code = ? AND id != ?", req.Code, id).Count(&count).Error; err != nil {
 			return err
 		}
 		if count > 0 {
@@ -144,7 +144,7 @@ func (s *Service) Delete(ctx context.Context, id uint) error {
 	// 开启事务，同时删除角色权限关联
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 删除角色权限关联
-		if err := tx.Where("permission_id = ?", id).Delete(&role.RolePermission{}).Error; err != nil {
+		if err = tx.Where("permission_id = ?", id).Delete(&role.RolePermission{}).Error; err != nil {
 			return err
 		}
 

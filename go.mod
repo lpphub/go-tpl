@@ -6,8 +6,9 @@ require (
 	github.com/felixge/fgprof v0.9.5
 	github.com/gin-gonic/gin v1.11.0
 	github.com/goccy/go-yaml v1.18.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/prometheus/client_golang v1.23.2
-	github.com/redis/go-redis/v9 v9.14.1
+	github.com/redis/go-redis/v9 v9.16.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.43.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

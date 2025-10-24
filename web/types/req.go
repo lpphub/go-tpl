@@ -78,3 +78,15 @@ type AssignUserRolesReq struct {
 type UpdateStatusReq struct {
 	Status int8 `json:"status" binding:"required"`
 }
+
+// 登录注册请求类型
+type LoginReq struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type RegisterReq struct {
+	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}

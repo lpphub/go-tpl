@@ -93,7 +93,7 @@ func (s *Service) Update(ctx context.Context, id uint, req types.UpdateRoleReq) 
 	if req.Name != "" && req.Name != role.Name {
 		// 检查角色名是否已存在
 		var count int64
-		if err := s.db.WithContext(ctx).Model(&Role{}).Where("name = ? AND id != ?", req.Name, id).Count(&count).Error; err != nil {
+		if err = s.db.WithContext(ctx).Model(&Role{}).Where("name = ? AND id != ?", req.Name, id).Count(&count).Error; err != nil {
 			return err
 		}
 		if count > 0 {
@@ -128,12 +128,12 @@ func (s *Service) Delete(ctx context.Context, id uint) error {
 	// 开启事务，同时删除角色权限关联
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 删除角色权限关联
-		if err := tx.Where("role_id = ?", id).Delete(&RolePermission{}).Error; err != nil {
+		if err = tx.Where("role_id = ?", id).Delete(&RolePermission{}).Error; err != nil {
 			return err
 		}
 
 		// 删除用户角色关联
-		if err := tx.Where("role_id = ?", id).Delete(&user.UserRole{}).Error; err != nil {
+		if err = tx.Where("role_id = ?", id).Delete(&user.UserRole{}).Error; err != nil {
 			return err
 		}
 
@@ -178,7 +178,7 @@ func (s *Service) AssignPermissions(ctx context.Context, roleId uint, permission
 	// 开启事务
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 删除角色现有权限
-		if err := tx.Where("role_id = ?", roleId).Delete(&RolePermission{}).Error; err != nil {
+		if err = tx.Where("role_id = ?", roleId).Delete(&RolePermission{}).Error; err != nil {
 			return err
 		}
 
@@ -191,7 +191,7 @@ func (s *Service) AssignPermissions(ctx context.Context, roleId uint, permission
 					PermissionID: permissionId,
 				}
 			}
-			if err := tx.Create(&rolePermissions).Error; err != nil {
+			if err = tx.Create(&rolePermissions).Error; err != nil {
 				return err
 			}
 		}
