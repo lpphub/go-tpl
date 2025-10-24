@@ -13,6 +13,7 @@ const (
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logCtx := logging.WithLogID(c.Request.Context(), getLogIDFromGin(c))
+
 		c.Request = c.Request.WithContext(logCtx)
 
 		c.Next()
@@ -25,7 +26,7 @@ func getLogIDFromGin(ctx *gin.Context) string {
 	if ctx.Request != nil && ctx.Request.Header != nil {
 		logId = ctx.GetHeader(GinHeaderLogID)
 	}
-	
+
 	if logId == "" {
 		logId = logging.GenerateLogID()
 	}
