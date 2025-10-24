@@ -12,7 +12,7 @@ const (
 )
 
 func init() {
-	logging.RegisterCtxExtractor(func(ctx context.Context) context.Context {
+	logging.RegisterCtxConvertor(func(ctx context.Context) context.Context {
 		if gCtx, ok := ctx.(*gin.Context); ok {
 			return gCtx.Request.Context()
 		}

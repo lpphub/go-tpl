@@ -50,7 +50,10 @@ func (l *ZapLogger) newLogger() *zap.Logger {
 		l.getLogWriter(l.cfg.logFile),
 		l.getZapLevel(l.cfg.logLevel),
 	)
-	return zap.New(core)
+	return zap.New(core,
+		zap.AddCaller(),
+		zap.AddCallerSkip(3),
+	)
 }
 
 func (l *ZapLogger) getLogEncoder() zapcore.Encoder {

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"go-tpl/infra/logging"
 	"go-tpl/web/base"
 
@@ -13,6 +14,8 @@ func Test(c *gin.Context) {
 	logging.Info(c.Request.Context(), "test2")
 
 	logging.Info(c, "test3")
+
+	logging.Errorw(c, errors.New("test"))
 
 	base.OKWithData(c, "ok")
 }

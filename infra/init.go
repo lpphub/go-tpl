@@ -3,6 +3,7 @@ package infra
 import (
 	"fmt"
 	"go-tpl/infra/config"
+	"go-tpl/infra/dbs"
 	"go-tpl/infra/logging"
 
 	"github.com/redis/go-redis/v9"
@@ -27,14 +28,14 @@ func Init() {
 	logging.Init()
 
 	// 3.初始化数据库和Redis
-	//DB, err = dbs.NewMysqlDB(Cfg.Database)
-	//if err != nil {
-	//	panic(fmt.Sprintf("Failed to connect to database: %v", err))
-	//}
-	//
-	//Redis, err = dbs.NewRedis(Cfg.Redis)
-	//if err != nil {
-	//	panic(fmt.Sprintf("Failed to connect to redis: %v", err))
-	//}
+	DB, err = dbs.NewMysqlDB(Cfg.Database)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+	}
+
+	Redis, err = dbs.NewRedis(Cfg.Redis)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to redis: %v", err))
+	}
 
 }

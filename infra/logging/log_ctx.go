@@ -16,17 +16,17 @@ func (l *LogContext) log(level LogLevel, msg string) {
 	l.Logger.Write(level, msg, l.Fields...)
 }
 
-type logCtxExtractor func(ctx context.Context) context.Context
+type ctxConvertor func(ctx context.Context) context.Context
 
-var ctxExtractors []logCtxExtractor
+var ctxConvertors []ctxConvertor
 
-func RegisterCtxExtractor(ce func(ctx context.Context) context.Context) {
-	ctxExtractors = append(ctxExtractors, ce)
+// RegisterCtxConvertor 注册的context convertor，比如gin.Context
+func RegisterCtxConvertor(cc ctxConvertor) {
+	ctxConvertors = append(ctxConvertors, cc)
 }
 
 func WithContext(ctx context.Context) *LogContext {
-	logCtx, ok := ctx.(*LogContext)
-	if ok {
+	if logCtx, ok := ctx.(*LogContext); ok {
 		return logCtx
 	}
 	return &LogContext{
@@ -47,10 +47,9 @@ func getLoggerFromCtx(ctx context.Context) *LogContext {
 		return WithContext(context.TODO())
 	}
 
-	// 兼容注册的context extractor，比如gin.Context
-	for _, fn := range ctxExtractors {
-		if gCtx := fn(ctx); gCtx != nil {
-			ctx = gCtx
+	for _, fn := range ctxConvertors {
+		if c := fn(ctx); c != nil {
+			ctx = c
 		}
 	}
 
@@ -68,15 +67,14 @@ func Debug(ctx context.Context, msg string) {
 }
 
 func Debugf(ctx context.Context, format string, args ...interface{}) {
-	Debug(ctx, fmt.Sprintf(format, args))
-
+	getLoggerFromCtx(ctx).log(DebugLevel, fmt.Sprintf(format, args))
 }
 func Info(ctx context.Context, msg string) {
 	getLoggerFromCtx(ctx).log(InfoLevel, msg)
 }
 
 func Infof(ctx context.Context, format string, args ...interface{}) {
-	Info(ctx, fmt.Sprintf(format, args))
+	getLoggerFromCtx(ctx).log(InfoLevel, fmt.Sprintf(format, args))
 }
 
 func Error(ctx context.Context, msg string) {
@@ -84,7 +82,11 @@ func Error(ctx context.Context, msg string) {
 }
 
 func Errorf(ctx context.Context, format string, args ...interface{}) {
-	Error(ctx, fmt.Sprintf(format, args))
+	getLoggerFromCtx(ctx).log(ErrorLevel, fmt.Sprintf(format, args))
+}
+
+func Errorw(ctx context.Context, err error) {
+	getLoggerFromCtx(ctx).log(ErrorLevel, err.Error())
 }
 
 func Warn(ctx context.Context, msg string) {
@@ -92,5 +94,5 @@ func Warn(ctx context.Context, msg string) {
 }
 
 func Warnf(ctx context.Context, format string, args ...interface{}) {
-	Warn(ctx, fmt.Sprintf(format, args))
+	getLoggerFromCtx(ctx).log(WarnLevel, fmt.Sprintf(format, args))
 }
