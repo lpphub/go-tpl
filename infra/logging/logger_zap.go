@@ -9,7 +9,7 @@ import (
 )
 
 type ZapLogger struct {
-	cfg    *config
+	cfg    *Config
 	logger *zap.Logger
 }
 
@@ -36,19 +36,23 @@ func (l *ZapLogger) Write(level LogLevel, msg string, fields ...Field) {
 	}
 }
 
-func setupZapLogger(cfg *config) Logger {
+func setupZapLogger(cfg *Config) (Logger, error) {
 	zl := &ZapLogger{
 		cfg: cfg,
 	}
 	zl.logger = zl.newLogger()
-	return zl
+	return zl, nil
+}
+
+func (l *ZapLogger) GetLogger() *zap.Logger {
+	return l.logger
 }
 
 func (l *ZapLogger) newLogger() *zap.Logger {
 	core := zapcore.NewCore(
 		l.getLogEncoder(),
-		l.getLogWriter(l.cfg.logFile),
-		l.getZapLevel(l.cfg.logLevel),
+		l.getLogWriter(l.cfg.LogFile),
+		l.getZapLevel(l.cfg.LogLevel),
 	)
 	return zap.New(core,
 		zap.AddCaller(),

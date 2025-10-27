@@ -1,5 +1,7 @@
 package logging
 
+import "fmt"
+
 type LogLevel int8
 
 const (
@@ -19,16 +21,26 @@ type Logger interface {
 	Write(level LogLevel, msg string, fields ...Field)
 }
 
-var logger Logger
+type LoggerProvider func(*Config) (Logger, error)
 
-func Init(opts ...Option) {
-	cfg := &config{}
+var globalLogger Logger
+
+func Init(opts ...Option) error {
+	cfg := &Config{
+		LogLevel: InfoLevel,
+		provider: setupZapLogger, // 默认使用zap
+	}
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
-	logger = setupZapLogger(cfg)
+	var err error
+	globalLogger, err = cfg.provider(cfg)
+	if err != nil {
+		return fmt.Errorf("log: create logger failed: %v", err)
+	}
+	return nil
 }
 func GetLogger() Logger {
-	return logger
+	return globalLogger
 }

@@ -53,10 +53,6 @@ func getLoggerFromCtx(ctx context.Context) *LogContext {
 		}
 	}
 
-	if logCtx, ok := ctx.(*LogContext); ok {
-		return logCtx
-	}
-
 	return WithContext(ctx)
 }
 
