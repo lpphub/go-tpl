@@ -25,70 +25,78 @@ func RegisterCtxConvertor(cc ctxConvertor) {
 	ctxConvertors = append(ctxConvertors, cc)
 }
 
-func WithContext(ctx context.Context) *LogContext {
+func WithLogID(ctx context.Context, logID string) *LogContext {
+	return WithContext(ctx, Field{Key: "logID", Value: logID})
+}
+
+func WithContext(ctx context.Context, fields ...Field) *LogContext {
+	if ctx == nil {
+		ctx = context.TODO()
+	}
+	c := withContext(ctx)
+	if len(fields) > 0 {
+		c.Fields = append(c.Fields, fields...)
+	}
+	return c
+}
+
+// 从 context 获取或创建 LogContext
+func withContext(ctx context.Context) *LogContext {
 	if logCtx, ok := ctx.(*LogContext); ok {
 		return logCtx
 	}
+
+	for _, convertor := range ctxConvertors {
+		if c := convertor(ctx); c != nil {
+			if logCtx, ok := c.(*LogContext); ok {
+				return logCtx
+			}
+			return &LogContext{
+				Context: c,
+				Logger:  GetLogger(),
+			}
+		}
+	}
+
 	return &LogContext{
 		Context: ctx,
 		Logger:  GetLogger(),
 	}
 }
 
-func WithLogID(ctx context.Context, logID string) *LogContext {
-	logCtx := WithContext(ctx)
-
-	logCtx.Fields = append(logCtx.Fields, Field{Key: "logID", Value: logID})
-	return logCtx
-}
-
-func getLoggerFromCtx(ctx context.Context) *LogContext {
-	if ctx == nil {
-		return WithContext(context.TODO())
-	}
-
-	for _, fn := range ctxConvertors {
-		if c := fn(ctx); c != nil {
-			ctx = c
-		}
-	}
-
-	return WithContext(ctx)
-}
-
 // 统一的日志函数
 
 func Debug(ctx context.Context, msg string) {
-	getLoggerFromCtx(ctx).log(DebugLevel, msg)
+	withContext(ctx).log(DebugLevel, msg)
 }
 
 func Debugf(ctx context.Context, format string, args ...interface{}) {
-	getLoggerFromCtx(ctx).log(DebugLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(DebugLevel, fmt.Sprintf(format, args))
 }
 func Info(ctx context.Context, msg string) {
-	getLoggerFromCtx(ctx).log(InfoLevel, msg)
+	withContext(ctx).log(InfoLevel, msg)
 }
 
 func Infof(ctx context.Context, format string, args ...interface{}) {
-	getLoggerFromCtx(ctx).log(InfoLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(InfoLevel, fmt.Sprintf(format, args))
 }
 
 func Error(ctx context.Context, msg string) {
-	getLoggerFromCtx(ctx).log(ErrorLevel, msg)
+	withContext(ctx).log(ErrorLevel, msg)
 }
 
 func Errorf(ctx context.Context, format string, args ...interface{}) {
-	getLoggerFromCtx(ctx).log(ErrorLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(ErrorLevel, fmt.Sprintf(format, args))
 }
 
 func Errorw(ctx context.Context, err error) {
-	getLoggerFromCtx(ctx).log(ErrorLevel, err.Error())
+	withContext(ctx).log(ErrorLevel, err.Error())
 }
 
 func Warn(ctx context.Context, msg string) {
-	getLoggerFromCtx(ctx).log(WarnLevel, msg)
+	withContext(ctx).log(WarnLevel, msg)
 }
 
 func Warnf(ctx context.Context, format string, args ...interface{}) {
-	getLoggerFromCtx(ctx).log(WarnLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(WarnLevel, fmt.Sprintf(format, args))
 }

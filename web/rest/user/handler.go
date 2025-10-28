@@ -20,7 +20,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	data, err := logic.UserSvc.List(c.Request.Context(), req)
+	data, err := logic.UserSvc.List(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to get user list: %v", err)
 		base.FailWithError(c, err)
@@ -39,7 +39,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	user, err := logic.UserSvc.Get(c.Request.Context(), uint(id))
+	user, err := logic.UserSvc.Get(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get user: %v", err)
 		base.FailWithError(c, err)
@@ -58,7 +58,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	user, err := logic.UserSvc.Create(c.Request.Context(), req)
+	user, err := logic.UserSvc.Create(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to create user: %v", err)
 		base.FailWithError(c, err)
@@ -85,7 +85,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	err = logic.UserSvc.Update(c.Request.Context(), uint(id), req)
+	err = logic.UserSvc.Update(c, uint(id), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to update user: %v", err)
 		base.FailWithError(c, err)
@@ -105,7 +105,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	err = logic.UserSvc.Delete(c.Request.Context(), uint(id))
+	err = logic.UserSvc.Delete(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to delete user: %v", err)
 		base.FailWithError(c, err)
@@ -132,7 +132,7 @@ func UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	err = logic.UserSvc.UpdateStatus(c.Request.Context(), uint(id), req.Status)
+	err = logic.UserSvc.UpdateStatus(c, uint(id), req.Status)
 	if err != nil {
 		logging.Errorf(c, "Failed to update user status: %v", err)
 		base.FailWithError(c, err)
@@ -152,7 +152,7 @@ func GetUserRoles(c *gin.Context) {
 		return
 	}
 
-	roleIds, err := logic.UserSvc.GetUserRoles(c.Request.Context(), uint(id))
+	roleIds, err := logic.UserSvc.GetUserRoles(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get user roles: %v", err)
 		base.FailWithError(c, err)
@@ -178,7 +178,7 @@ func AssignRoles(c *gin.Context) {
 		return
 	}
 
-	err = logic.UserSvc.AssignRoles(c.Request.Context(), uint(id), req.RoleIds)
+	err = logic.UserSvc.AssignRoles(c, uint(id), req.RoleIds)
 	if err != nil {
 		logging.Errorf(c, "Failed to assign roles: %v", err)
 		base.FailWithError(c, err)

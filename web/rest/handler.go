@@ -32,7 +32,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 创建用户
-	user, err := logic.UserSvc.Create(c.Request.Context(), types.CreateUserReq{
+	user, err := logic.UserSvc.Create(c, types.CreateUserReq{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: req.Password,
@@ -64,7 +64,7 @@ func Login(c *gin.Context) {
 	}
 
 	// 验证用户名和密码
-	user, err := logic.UserSvc.ValidateLogin(c.Request.Context(), req.Username, req.Password)
+	user, err := logic.UserSvc.ValidateLogin(c, req.Username, req.Password)
 	if err != nil {
 		base.FailWithError(c, err)
 		return

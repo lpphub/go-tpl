@@ -20,7 +20,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	data, err := logic.PermissionSvc.List(c.Request.Context(), req)
+	data, err := logic.PermissionSvc.List(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to get permission list: %v", err)
 		base.FailWithError(c, err)
@@ -39,7 +39,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	permission, err := logic.PermissionSvc.Get(c.Request.Context(), uint(id))
+	permission, err := logic.PermissionSvc.Get(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get permission: %v", err)
 		base.FailWithError(c, err)
@@ -58,7 +58,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	permission, err := logic.PermissionSvc.Create(c.Request.Context(), req)
+	permission, err := logic.PermissionSvc.Create(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to create permission: %v", err)
 		base.FailWithError(c, err)
@@ -126,7 +126,7 @@ func UpdateStatus(c *gin.Context) {
 	}
 
 	var req types.UpdateStatusReq
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		logging.Errorf(c, "Invalid request: %v", err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return

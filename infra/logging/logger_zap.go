@@ -64,7 +64,7 @@ func (l *ZapLogger) getLogEncoder() zapcore.Encoder {
 	encoderCfg := zapcore.EncoderConfig{
 		LevelKey:       "level",
 		TimeKey:        "time",
-		CallerKey:      "file",
+		CallerKey:      "caller",
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,

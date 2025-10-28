@@ -33,9 +33,9 @@ func Init() {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	Redis, err = dbs.NewRedis(Cfg.Redis)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to connect to redis: %v", err))
-	}
+	//Redis, err = dbs.NewRedis(Cfg.Redis)
+	//if err != nil {
+	//	panic(fmt.Sprintf("Failed to connect to redis: %v", err))
+	//}
 
 }

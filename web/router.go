@@ -2,7 +2,6 @@ package web
 
 import (
 	"go-tpl/infra/logging/logx"
-	"go-tpl/web/middleware"
 	"go-tpl/web/rest"
 	"go-tpl/web/rest/permission"
 	"go-tpl/web/rest/role"
@@ -23,7 +22,7 @@ func SetupRouter() *gin.Engine {
 	api.POST("/register", rest.Register)
 	api.POST("/login", rest.Login)
 
-	auth := api.Group("", middleware.JWTAuth())
+	auth := api.Group("")
 	{
 		// 注册接口处理器
 		user.Register(auth)

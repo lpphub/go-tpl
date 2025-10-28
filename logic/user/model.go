@@ -14,7 +14,7 @@ type User struct {
 	Status    int8           `gorm:"default:1" json:"status"` // 1-正常, 0-禁用
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 func (User) TableName() string {

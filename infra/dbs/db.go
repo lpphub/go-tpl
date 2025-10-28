@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/config"
+	"go-tpl/infra/logging/logx"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -15,7 +16,9 @@ func NewMysqlDB(cfg config.DBConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Dbname,
 	)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logx.NewGormLogger(),
+	})
 	if err != nil {
 		return nil, err
 	}

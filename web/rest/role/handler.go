@@ -20,7 +20,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	data, err := logic.RoleSvc.List(c.Request.Context(), req)
+	data, err := logic.RoleSvc.List(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to get role list: %v", err)
 		base.FailWithError(c, err)
@@ -39,7 +39,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	role, err := logic.RoleSvc.Get(c.Request.Context(), uint(id))
+	role, err := logic.RoleSvc.Get(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role: %v", err)
 		base.FailWithError(c, err)
@@ -58,7 +58,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	role, err := logic.RoleSvc.Create(c.Request.Context(), req)
+	role, err := logic.RoleSvc.Create(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to create role: %v", err)
 		base.FailWithError(c, err)
@@ -85,7 +85,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	err = logic.RoleSvc.Update(c.Request.Context(), uint(id), req)
+	err = logic.RoleSvc.Update(c, uint(id), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to update role: %v", err)
 		base.FailWithError(c, err)
@@ -105,7 +105,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	err = logic.RoleSvc.Delete(c.Request.Context(), uint(id))
+	err = logic.RoleSvc.Delete(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to delete role: %v", err)
 		base.FailWithError(c, err)
@@ -132,7 +132,7 @@ func UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	err = logic.RoleSvc.UpdateStatus(c.Request.Context(), uint(id), req.Status)
+	err = logic.RoleSvc.UpdateStatus(c, uint(id), req.Status)
 	if err != nil {
 		logging.Errorf(c, "Failed to update role status: %v", err)
 		base.FailWithError(c, err)
@@ -152,7 +152,7 @@ func GetRolePermissions(c *gin.Context) {
 		return
 	}
 
-	permissionIds, err := logic.RoleSvc.GetRolePermissions(c.Request.Context(), uint(id))
+	permissionIds, err := logic.RoleSvc.GetRolePermissions(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role permissions: %v", err)
 		base.FailWithError(c, err)
@@ -178,7 +178,7 @@ func AssignPermissions(c *gin.Context) {
 		return
 	}
 
-	err = logic.RoleSvc.AssignPermissions(c.Request.Context(), uint(id), req.PermissionIds)
+	err = logic.RoleSvc.AssignPermissions(c, uint(id), req.PermissionIds)
 	if err != nil {
 		logging.Errorf(c, "Failed to assign permissions: %v", err)
 		base.FailWithError(c, err)
@@ -198,7 +198,7 @@ func GetRoleUsers(c *gin.Context) {
 		return
 	}
 
-	userIds, err := logic.RoleSvc.GetRoleUsers(c.Request.Context(), uint(id))
+	userIds, err := logic.RoleSvc.GetRoleUsers(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get role users: %v", err)
 		base.FailWithError(c, err)
