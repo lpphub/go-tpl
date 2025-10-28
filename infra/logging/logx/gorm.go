@@ -9,98 +9,95 @@ import (
 	"strings"
 	"time"
 
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 // GormLogger 自定义GORM日志记录器
 type GormLogger struct {
-	logger        *zap.Logger
-	LogLevel      logger.LogLevel
+	logger        logging.Logger
+	logLevel      logger.LogLevel
 	slowThreshold time.Duration
 }
 
 // NewGormLogger 创建新的GORM日志记录器
 func NewGormLogger() logger.Interface {
-	zapLog := logging.GetLogger().(*logging.ZapLogger).GetLogger()
 	return &GormLogger{
-		logger:   zapLog.WithOptions(zap.AddCallerSkip(0)),
-		LogLevel: logger.Info,
+		logger:   logging.GetLogger().WithCaller(1),
+		logLevel: logger.Info,
 	}
 }
 
 // LogMode 设置日志模式
 func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
 	newLogger := *l
-	newLogger.LogLevel = level
+	newLogger.logLevel = level
 	return &newLogger
 }
 
 // Info 记录信息日志
 func (l *GormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= logger.Info {
+	if l.logLevel >= logger.Info {
 		l.log(ctx, logger.Info, msg, data...)
 	}
 }
 
 // Warn 记录警告日志
 func (l *GormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= logger.Warn {
+	if l.logLevel >= logger.Warn {
 		l.log(ctx, logger.Warn, msg, data...)
 	}
 }
 
 // Error 记录错误日志
 func (l *GormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
-	if l.LogLevel >= logger.Error {
+	if l.logLevel >= logger.Error {
 		l.log(ctx, logger.Error, msg, data...)
 	}
 }
 
 // Trace 记录SQL执行追踪
 func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
-	elapsed := time.Now().Sub(begin)
-	duration := float64(elapsed.Nanoseconds()/1e4) / 100.0
+	if l.logLevel <= logger.Silent {
+		return
+	}
+
+	elapsed := time.Since(begin)
+	sql, rows := fc()
+
+	// add field
+	fields := []logging.Field{
+		{Key: "duration_ms", Value: elapsed.Milliseconds()},
+		{Key: "sql", Value: sql},
+		{Key: "rows", Value: rows},
+	}
+
+	// 添加上下文字段
+	fields = append(fields, logging.WithContext(ctx).Fields...)
 
 	msg := "sql do success"
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		// 没有找到记录不统计在请求错误中
 		msg = err.Error()
 	}
 
-	// 获取sql
-	sql, rows := fc()
-
-	fields := []zap.Field{
-		zap.String("sql", sql),
-		zap.Int64("rows", rows),
-		zap.Float64("duration", duration),
-	}
-	// 获取上下文中的字段
-	logCtx := logging.WithContext(ctx)
-	for _, f := range logCtx.Fields {
-		fields = append(fields, zap.Any(f.Key, f.Value))
-	}
-
-	l.logger.Info(msg, fields...)
+	l.logger.Write(logging.InfoLevel, msg, fields...)
 }
 
 // log 通用日志记录方法
-func (l *GormLogger) log(ctx context.Context, level logger.LogLevel, msg string, data ...interface{}) {
+func (l *GormLogger) log(_ context.Context, level logger.LogLevel, msg string, data ...interface{}) {
 	if len(data) > 0 {
 		msg = fmt.Sprintf("%s | data: %v", msg, data)
 	}
 
 	switch level {
 	case logger.Info:
-		logging.Info(ctx, msg)
+		l.logger.Write(logging.InfoLevel, msg)
 	case logger.Warn:
-		logging.Warn(ctx, msg)
+		l.logger.Write(logging.WarnLevel, msg)
 	case logger.Error:
-		logging.Error(ctx, msg)
+		l.logger.Write(logging.ErrorLevel, msg)
 	default:
-		logging.Info(ctx, msg)
+		l.logger.Write(logging.InfoLevel, msg)
 	}
 }
 

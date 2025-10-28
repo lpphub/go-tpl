@@ -19,6 +19,8 @@ type Field struct {
 
 type Logger interface {
 	Write(level LogLevel, msg string, fields ...Field)
+
+	WithCaller(skip int) Logger
 }
 
 var globalLogger Logger

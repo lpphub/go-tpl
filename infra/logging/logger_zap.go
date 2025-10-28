@@ -36,11 +36,19 @@ func (l *ZapLogger) Write(level LogLevel, msg string, fields ...Field) {
 	}
 }
 
+func (l *ZapLogger) WithCaller(skip int) Logger {
+	newLogger := l.logger.WithOptions(zap.AddCallerSkip(skip))
+	return &ZapLogger{
+		cfg:    l.cfg,
+		logger: newLogger,
+	}
+}
+
 func setupZapLogger(cfg *Config) (Logger, error) {
 	zl := &ZapLogger{
 		cfg: cfg,
 	}
-	zl.logger = zl.newLogger()
+	zl.logger = zl.newLogger().WithOptions(zap.AddCaller(), zap.AddCallerSkip(3))
 	return zl, nil
 }
 
@@ -54,10 +62,7 @@ func (l *ZapLogger) newLogger() *zap.Logger {
 		l.getLogWriter(l.cfg.LogFile),
 		l.getZapLevel(l.cfg.LogLevel),
 	)
-	return zap.New(core,
-		zap.AddCaller(),
-		zap.AddCallerSkip(3),
-	)
+	return zap.New(core)
 }
 
 func (l *ZapLogger) getLogEncoder() zapcore.Encoder {
