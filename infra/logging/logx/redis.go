@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/logging"
+	"net"
 	"strings"
 	"time"
 
@@ -23,7 +24,24 @@ func NewRedisLogger() *RedisLogger {
 }
 
 func (l *RedisLogger) DialHook(next redis.DialHook) redis.DialHook {
-	return next
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		start := time.Now()
+		conn, err := next(ctx, network, addr)
+
+		fields := []logging.Field{
+			{Key: "event", Value: "redis_dial"},
+			{Key: "address", Value: addr},
+			{Key: "duration_ms", Value: time.Since(start).Milliseconds()},
+		}
+
+		if err != nil {
+			l.logger.Write(logging.ErrorLevel, fmt.Sprintf("redis connected failed: %v", err), fields...)
+		} else {
+			l.logger.Write(logging.InfoLevel, "redis connected", fields...)
+		}
+
+		return conn, err
+	}
 }
 
 // ProcessHook 实现命令处理钩子
@@ -33,7 +51,36 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		err := next(ctx, cmd)
 		elapsed := time.Since(start)
 
-		l.logRedisCommand(ctx, cmd, err, elapsed)
+		// 构建命令字符串
+		cmdStr := l.buildCommandString(cmd)
+
+		// 添加字段
+		fields := []logging.Field{
+			{Key: "event", Value: "redis_command"},
+			{Key: "duration_ms", Value: elapsed.Milliseconds()},
+			{Key: "command", Value: cmdStr},
+		}
+
+		// 添加上下文字段
+		fields = append(fields, logging.WithContext(ctx).Fields...)
+
+		// 根据是否有错误确定日志级别和消息
+		msg := "redis command success"
+		level := logging.InfoLevel
+
+		if err != nil {
+			msg = fmt.Sprintf("redis command failed: %v", err)
+			level = logging.ErrorLevel
+		}
+
+		// 对于慢查询，使用警告级别
+		if elapsed > 100*time.Millisecond && err == nil {
+			msg = fmt.Sprintf("redis slow query detected (%v)", elapsed)
+			level = logging.WarnLevel
+		}
+
+		l.logger.Write(level, msg, fields...)
+
 		return err
 	}
 }
@@ -62,39 +109,6 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 
 		return err
 	}
-}
-
-// logRedisCommand 记录Redis命令日志
-func (l *RedisLogger) logRedisCommand(ctx context.Context, cmd redis.Cmder, err error, elapsed time.Duration) {
-
-	// 构建命令字符串
-	cmdStr := l.buildCommandString(cmd)
-
-	// 添加字段
-	fields := []logging.Field{
-		{Key: "duration_ms", Value: elapsed.Milliseconds()},
-		{Key: "command", Value: cmdStr},
-	}
-
-	// 添加上下文字段
-	fields = append(fields, logging.WithContext(ctx).Fields...)
-
-	// 根据是否有错误确定日志级别和消息
-	msg := "redis command success"
-	level := logging.InfoLevel
-
-	if err != nil {
-		msg = fmt.Sprintf("redis command failed: %v", err)
-		level = logging.ErrorLevel
-	}
-
-	// 对于慢查询，使用警告级别
-	if elapsed > 100*time.Millisecond && err == nil {
-		msg = fmt.Sprintf("redis slow query detected (%v)", elapsed)
-		level = logging.WarnLevel
-	}
-
-	l.logger.Write(level, msg, fields...)
 }
 
 // buildCommandString 构建命令字符串（隐藏敏感信息）
