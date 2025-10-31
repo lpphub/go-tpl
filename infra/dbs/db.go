@@ -46,5 +46,8 @@ func NewRedis(cfg config.RedisConfig) (*redis.Client, error) {
 	if err := client.Ping(context.TODO()).Err(); err != nil {
 		return nil, err
 	}
+
+	client.AddHook(logx.NewRedisLogger())
+
 	return client, nil
 }
