@@ -23,6 +23,8 @@ func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logCtx := logging.WithLogID(c.Request.Context(), getLogIDFromGin(c))
 
+		logging.Infof(logCtx, "[%s %s]", c.Request.Method, c.Request.RequestURI)
+
 		c.Request = c.Request.WithContext(logCtx)
 
 		c.Next()

@@ -71,14 +71,14 @@ func Debug(ctx context.Context, msg string) {
 }
 
 func Debugf(ctx context.Context, format string, args ...interface{}) {
-	withContext(ctx).log(DebugLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(DebugLevel, fmt.Sprintf(format, args...))
 }
 func Info(ctx context.Context, msg string) {
 	withContext(ctx).log(InfoLevel, msg)
 }
 
 func Infof(ctx context.Context, format string, args ...interface{}) {
-	withContext(ctx).log(InfoLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(InfoLevel, fmt.Sprintf(format, args...))
 }
 
 func Error(ctx context.Context, msg string) {
@@ -86,7 +86,7 @@ func Error(ctx context.Context, msg string) {
 }
 
 func Errorf(ctx context.Context, format string, args ...interface{}) {
-	withContext(ctx).log(ErrorLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(ErrorLevel, fmt.Sprintf(format, args...))
 }
 
 func Errorw(ctx context.Context, err error) {
@@ -98,5 +98,5 @@ func Warn(ctx context.Context, msg string) {
 }
 
 func Warnf(ctx context.Context, format string, args ...interface{}) {
-	withContext(ctx).log(WarnLevel, fmt.Sprintf(format, args))
+	withContext(ctx).log(WarnLevel, fmt.Sprintf(format, args...))
 }
