@@ -57,8 +57,8 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		// 添加字段
 		fields := []logging.Field{
 			{Key: "event", Value: "redis_command"},
-			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 			{Key: "command", Value: cmdStr},
+			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 		}
 
 		// 添加上下文字段
