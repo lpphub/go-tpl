@@ -20,7 +20,7 @@ func List(c *gin.Context) {
 		return
 	}
 
-	data, err := logic.PermissionSvc.List(c, req)
+	data, err := logic.Svc.Permission.List(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to get permission list: %v", err)
 		base.FailWithError(c, err)
@@ -39,7 +39,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	permission, err := logic.PermissionSvc.Get(c, uint(id))
+	permission, err := logic.Svc.Permission.Get(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get permission: %v", err)
 		base.FailWithError(c, err)
@@ -58,7 +58,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	permission, err := logic.PermissionSvc.Create(c, req)
+	permission, err := logic.Svc.Permission.Create(c, req)
 	if err != nil {
 		logging.Errorf(c, "Failed to create permission: %v", err)
 		base.FailWithError(c, err)
@@ -85,7 +85,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	err = logic.PermissionSvc.Update(c, uint(id), req)
+	err = logic.Svc.Permission.Update(c, uint(id), req)
 	if err != nil {
 		logging.Errorf(c, "Failed to update permission: %v", err)
 		base.FailWithError(c, err)
@@ -105,7 +105,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	err = logic.PermissionSvc.Delete(c, uint(id))
+	err = logic.Svc.Permission.Delete(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to delete permission: %v", err)
 		base.FailWithError(c, err)
@@ -132,7 +132,7 @@ func UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	err = logic.PermissionSvc.UpdateStatus(c, uint(id), req.Status)
+	err = logic.Svc.Permission.UpdateStatus(c, uint(id), req.Status)
 	if err != nil {
 		logging.Errorf(c, "Failed to update permission status: %v", err)
 		base.FailWithError(c, err)
@@ -145,7 +145,7 @@ func UpdateStatus(c *gin.Context) {
 
 // GetModules 获取所有模块列表
 func GetModules(c *gin.Context) {
-	modules, err := logic.PermissionSvc.GetModules(c)
+	modules, err := logic.Svc.Permission.GetModules(c)
 	if err != nil {
 		logging.Errorf(c, "Failed to get modules: %v", err)
 		base.FailWithError(c, err)
@@ -164,7 +164,7 @@ func GetPermissionRoles(c *gin.Context) {
 		return
 	}
 
-	roleIds, err := logic.PermissionSvc.GetPermissionRoles(c, uint(id))
+	roleIds, err := logic.Svc.Permission.GetPermissionRoles(c, uint(id))
 	if err != nil {
 		logging.Errorf(c, "Failed to get permission roles: %v", err)
 		base.FailWithError(c, err)
