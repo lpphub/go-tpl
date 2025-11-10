@@ -49,7 +49,7 @@ func (s *Service) List(ctx context.Context, req types.PermissionQueryReq) (*shar
 			return nil, err
 		}
 	}
-	return shared.Wrapper[Permission](total, list), nil
+	return shared.WithPageData[Permission](total, list), nil
 }
 
 // Get 获取单个权限

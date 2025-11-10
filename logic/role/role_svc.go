@@ -43,7 +43,7 @@ func (s *Service) List(ctx context.Context, req types.RoleQueryReq) (*shared.Pag
 			return nil, err
 		}
 	}
-	return shared.Wrapper[Role](total, list), nil
+	return shared.WithPageData[Role](total, list), nil
 }
 
 // Get 获取单个角色
