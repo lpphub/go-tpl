@@ -12,7 +12,7 @@ type PageData[T any] struct {
 	List  []T   `json:"list"`
 }
 
-func Wrapper[T any](total int64, list []T) *PageData[T] {
+func WithPageData[T any](total int64, list []T) *PageData[T] {
 	return &PageData[T]{
 		Total: total,
 		List:  list,

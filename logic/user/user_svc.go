@@ -50,7 +50,7 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 			return nil, err
 		}
 	}
-	return shared.Wrapper[User](total, list), nil
+	return shared.WithPageData[User](total, list), nil
 }
 
 // Get 获取单个用户
