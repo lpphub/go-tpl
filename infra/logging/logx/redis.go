@@ -63,7 +63,7 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		}
 
 		// 添加上下文字段
-		fields = append(fields, logging.WithContext(ctx).Fields...)
+		fields = append(fields, logging.WithContext(ctx).GetFields()...)
 
 		// 根据是否有错误确定日志级别和消息
 		msg := "redis command success"
@@ -100,7 +100,7 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 		}
 
-		fields = append(fields, logging.WithContext(ctx).Fields...)
+		fields = append(fields, logging.WithContext(ctx).GetFields()...)
 
 		if err != nil {
 			l.logger.Write(logging.ErrorLevel, fmt.Sprintf("redis pipeline failed: %v", err), fields...)

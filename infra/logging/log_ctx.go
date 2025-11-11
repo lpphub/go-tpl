@@ -8,8 +8,8 @@ import (
 type LogContext struct {
 	context.Context
 
-	Logger Logger
-	Fields []Field
+	logger Logger
+	fields []Field
 }
 
 type ctxConvertor func(ctx context.Context) context.Context
@@ -21,17 +21,13 @@ func RegisterCtxConvertor(cc ctxConvertor) {
 	ctxConvertors = append(ctxConvertors, cc)
 }
 
-func WithLogID(ctx context.Context, logID string) *LogContext {
-	return WithContext(ctx, Field{Key: "logID", Value: logID})
-}
-
 func WithContext(ctx context.Context, fields ...Field) *LogContext {
 	if ctx == nil {
 		ctx = context.TODO()
 	}
 	c := withContext(ctx)
 	if len(fields) > 0 {
-		c.Fields = append(c.Fields, fields...)
+		c.fields = append(c.fields, fields...)
 	}
 	return c
 }
@@ -49,20 +45,24 @@ func withContext(ctx context.Context) *LogContext {
 			}
 			return &LogContext{
 				Context: c,
-				Logger:  GetLogger(),
+				logger:  GetLogger(),
 			}
 		}
 	}
 
 	return &LogContext{
 		Context: ctx,
-		Logger:  GetLogger(),
+		logger:  GetLogger(),
 	}
 }
 
+func (l *LogContext) GetFields() []Field {
+	return l.fields
+}
+
 func (l *LogContext) log(level LogLevel, msg string, fields ...Field) {
-	fields = append(fields, l.Fields...)
-	l.Logger.Write(level, msg, fields...)
+	fields = append(fields, l.fields...)
+	l.logger.Write(level, msg, fields...)
 }
 
 // 统一的日志函数
