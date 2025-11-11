@@ -39,3 +39,11 @@ func Init() {
 	}
 
 }
+
+func ProvideDB() *gorm.DB {
+	return DB
+}
+
+func ProvideRedis() *redis.Client {
+	return Redis
+}

@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: my-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: app_db  # 可选：初始创建的数据库
+      MYSQL_ROOT_HOST: '%'  # 允许root远程连接，生产环境慎用
+      TZ: Asia/Shanghai  # 时区
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql  # 数据持久化
+#      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf:ro  # 自定义配置
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:8.2-alpine
+    container_name: my-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data  # 数据持久化
+#      - ./redis/conf/redis.conf:/etc/redis/redis.conf:ro  # 自定义配置
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

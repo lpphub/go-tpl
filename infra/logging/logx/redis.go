@@ -2,6 +2,7 @@ package logx
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go-tpl/infra/logging"
 	"net"
@@ -19,7 +20,7 @@ type RedisLogger struct {
 // NewRedisLogger 创建新的Redis日志记录器
 func NewRedisLogger() *RedisLogger {
 	return &RedisLogger{
-		logger: logging.GetLogger().WithCaller(1),
+		logger: logging.GetLogger().WithCaller(2),
 	}
 }
 
@@ -68,7 +69,7 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		msg := "redis command success"
 		level := logging.InfoLevel
 
-		if err != nil {
+		if err != nil && !errors.Is(err, redis.Nil) {
 			msg = fmt.Sprintf("redis command failed: %v", err)
 			level = logging.ErrorLevel
 		}

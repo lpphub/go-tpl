@@ -11,7 +11,7 @@ This is a production-grade Go web application template built with Gin framework 
 - **Go 1.25** - Programming language
 - **Gin** - HTTP web framework for REST APIs
 - **GORM** - ORM with MySQL driver
-- **Redis** - Caching and session management
+- **RDB** - Caching and session management
 - **JWT** - Authentication tokens (golang-jwt/jwt/v5)
 - **Wire** - Compile-time dependency injection
 - **Zap** - High-performance structured logging
@@ -30,7 +30,7 @@ config/                # Configuration files
 
 infra/                 # Infrastructure layer
 ├── config/            # Configuration management
-├── dbs/               # Database and Redis setup
+├── dbs/               # Database and RDB setup
 ├── jwt/               # JWT token handling
 ├── logging/           # Logging infrastructure
 │   └── logx/          # Custom logging utilities
@@ -62,14 +62,14 @@ scripts/               # Utility scripts
 - **Main Entry**: `cmd/run.go` - Application bootstrap following 4-step initialization
 - **Configuration**: `infra/config/config.go` - YAML-based config with environment variable overrides
 - **Database**: GORM with MySQL driver, accessible via `infra.DB` with transaction support
-- **Caching**: Redis client, accessible via `infra.Redis`
+- **Caching**: RDB client, accessible via `infra.RDB`
 - **Logging**: Zap-based structured logging with custom logx utilities and middleware
 - **Dependency Injection**: Wire-based compile-time DI for clean dependencies
 - **Monitoring**: Prometheus metrics and pprof profiling support
 - **Authentication**: JWT-based auth with bcrypt password hashing
 
 ### Initialization Flow
-1. `infra.Init()` - Load config, setup logging, initialize DB/Redis/JWT
+1. `infra.Init()` - Load config, setup logging, initialize DB/RDB/JWT
 2. `logic.Init()` - Initialize service layer with Wire dependency injection
 3. `web.SetupRouter()` - Setup HTTP routes, middleware, and handlers
 4. `monitor.SetupMetrics(app)` - Start Prometheus metrics collection
@@ -157,9 +157,9 @@ Configuration is loaded from `config/conf.yml` with environment variable overrid
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 - Default: MySQL on 127.0.0.1:3306
 
-### Redis Configuration
+### RDB Configuration
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`
-- Default: Redis on 127.0.0.1:6379
+- Default: RDB on 127.0.0.1:6379
 
 ### JWT Configuration
 - `JWT_SECRET`, `JWT_EXPIRE_TIME`
@@ -178,7 +178,7 @@ Configuration is loaded from `config/conf.yml` with environment variable overrid
 
 ### Service Layer Pattern
 - Each domain has dedicated service with business logic
-- Services accept infrastructure dependencies (DB, Redis)
+- Services accept infrastructure dependencies (DB, RDB)
 - Shared utilities in `logic/shared/`
 
 ### HTTP Handler Pattern
@@ -228,7 +228,7 @@ Configuration is loaded from `config/conf.yml` with environment variable overrid
 - `github.com/gin-gonic/gin v1.11.0` - HTTP web framework
 - `gorm.io/gorm v1.31.0` - ORM library
 - `gorm.io/driver/mysql v1.6.0` - MySQL database driver
-- `github.com/redis/go-redis/v9 v9.16.0` - Redis client
+- `github.com/redis/go-redis/v9 v9.16.0` - RDB client
 - `go.uber.org/zap v1.27.0` - Structured logging
 
 ### Authentication & Security

@@ -3,7 +3,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)](https://golang.org)
 [![Gin](https://img.shields.io/badge/Gin-HTTP%20Framework-green.svg)](https://gin-gonic.com/)
 [![GORM](https://img.shields.io/badge/GORM-ORM-orange.svg)](https://gorm.io/)
-[![Redis](https://img.shields.io/badge/Redis-Cache-red.svg)](https://redis.io/)
+[![RDB](https://img.shields.io/badge/RDB-Cache-red.svg)](https://redis.io/)
 [![JWT](https://img.shields.io/badge/JWT-Authentication-yellow.svg)](https://jwt.io/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -17,7 +17,7 @@
 - **用户管理**: 完整的 CRUD 操作、状态管理、角色分配
 - **基于角色的访问控制 (RBAC)**: 灵活的权限系统，支持细粒度权限控制
 - **数据库**: GORM with MySQL 驱动，完整的事务支持
-- **缓存**: Redis 集成，支持缓存和会话管理
+- **缓存**: RDB 集成，支持缓存和会话管理
 - **身份认证**: 基于 JWT 的身份认证，bcrypt 密码加密
 - **日志记录**: 基于 Zap 的高性能结构化日志和请求上下文
 - **监控**: Prometheus 指标收集和 pprof 性能分析
@@ -83,7 +83,7 @@ go-tpl/
 - **主入口**: `cmd/run.go` - 应用程序引导，遵循 4 步初始化流程
 - **配置管理**: `infra/config/config.go` - 基于 YAML 的配置，支持环境变量覆盖
 - **数据库层**: GORM with MySQL 驱动，通过 `infra.DB` 访问，支持事务
-- **缓存层**: Redis 客户端，通过 `infra.Redis` 访问
+- **缓存层**: RDB 客户端，通过 `infra.RDB` 访问
 - **日志系统**: 基于 Zap 的高性能结构化日志和自定义 logx 工具
 - **依赖注入**: Wire 编译时依赖注入，清晰的依赖流向
 - **监控系统**: Prometheus 指标收集和 pprof 性能分析
@@ -95,7 +95,7 @@ go-tpl/
 1. **基础设施初始化** (`infra.Init()`)
    - 加载配置文件和环境变量
    - 设置日志系统
-   - 初始化数据库连接和 Redis
+   - 初始化数据库连接和 RDB
    - 配置 JWT 和其他基础设施组件
 
 2. **业务逻辑初始化** (`logic.Init()`)
@@ -122,7 +122,7 @@ go-tpl/
 
 #### 数据存储
 - **MySQL** - 主数据库
-- **Redis v9.16.0** - 缓存和会话存储
+- **RDB v9.16.0** - 缓存和会话存储
 - **GORM MySQL Driver v1.6.0** - MySQL 数据库驱动
 
 #### 身份认证与安全
@@ -149,7 +149,7 @@ go-tpl/
 
 - Go 1.25+
 - MySQL 8.0+
-- Redis 6.0+
+- RDB 6.0+
 - Docker（可选）
 
 ### 安装
@@ -168,7 +168,7 @@ go mod tidy
 3. **配置应用程序**
 ```bash
 cp config/conf.yml.example config/conf.yml
-# 编辑 config/conf.yml 设置您的数据库和 Redis 配置
+# 编辑 config/conf.yml 设置您的数据库和 RDB 配置
 ```
 
 4. **运行应用程序**
@@ -216,7 +216,7 @@ database:
 - `DB_PASSWORD`
 - `DB_NAME`
 
-### Redis 配置
+### RDB 配置
 ```yaml
 redis:
   host: 127.0.0.1
@@ -759,7 +759,7 @@ wire ./logic/
 - `github.com/gin-gonic/gin v1.11.0` - HTTP Web 框架
 - `gorm.io/gorm v1.31.0` - ORM 库
 - `gorm.io/driver/mysql v1.6.0` - MySQL 数据库驱动
-- `github.com/redis/go-redis/v9 v9.16.0` - Redis 客户端
+- `github.com/redis/go-redis/v9 v9.16.0` - RDB 客户端
 - `go.uber.org/zap v1.27.0` - 高性能结构化日志
 
 ### 身份认证与安全

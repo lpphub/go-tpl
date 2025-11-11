@@ -25,7 +25,7 @@ func NewMysqlDB(cfg config.DBConfig) (*gorm.DB, error) {
 
 	pool, _ := db.DB()
 	pool.SetMaxIdleConns(2)
-	pool.SetMaxOpenConns(10)
+	pool.SetMaxOpenConns(20)
 	pool.SetConnMaxIdleTime(5 * time.Minute)
 	pool.SetConnMaxLifetime(30 * time.Minute)
 
@@ -33,21 +33,21 @@ func NewMysqlDB(cfg config.DBConfig) (*gorm.DB, error) {
 }
 
 func NewRedis(cfg config.RedisConfig) (*redis.Client, error) {
-	client := redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr:            fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password:        cfg.Password,
 		DB:              cfg.DB,
-		MinIdleConns:    1,
-		MaxActiveConns:  10,
+		MinIdleConns:    2,
+		MaxActiveConns:  8,
 		ConnMaxIdleTime: 3 * time.Minute,
 		ConnMaxLifetime: 10 * time.Minute,
 	})
 
-	if err := client.Ping(context.TODO()).Err(); err != nil {
+	if err := rdb.Ping(context.TODO()).Err(); err != nil {
 		return nil, err
 	}
 
-	client.AddHook(logx.NewRedisLogger())
+	rdb.AddHook(logx.NewRedisLogger())
 
-	return client, nil
+	return rdb, nil
 }

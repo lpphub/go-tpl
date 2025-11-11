@@ -13,8 +13,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -33,10 +31,10 @@ func main() {
 	run(app)
 }
 
-func run(engine *gin.Engine) {
+func run(handler http.Handler) {
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: engine,
+		Handler: handler,
 	}
 	go func() {
 		log.Printf("Server starting on %s", srv.Addr)
