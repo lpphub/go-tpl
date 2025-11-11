@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-	"go-tpl/infra/logging"
 	"go-tpl/logic/shared"
 	"go-tpl/web/types"
 
@@ -31,11 +30,6 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 		total int64
 		list  []User
 	)
-
-	get := s.redis.Get(ctx, "user_list").String()
-	if get != "" {
-		logging.Info(ctx, "Get user list from redis")
-	}
 
 	_db := s.db.WithContext(ctx).Model(&User{})
 	if req.Username != "" {
