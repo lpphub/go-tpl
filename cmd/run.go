@@ -21,13 +21,14 @@ func main() {
 	// 2.初始化逻辑层
 	logic.Init()
 
-	// 3.启动服务
+	// 3.配置路由
 	app := web.SetupRouter()
 
 	// 4.启动监控服务
 	monitor.SetupMetrics(app)
 	//monitor.SetupPprof()
 
+	// 5.启动服务
 	run(app)
 }
 
