@@ -61,7 +61,11 @@ func (l *LogContext) GetFields() []Field {
 }
 
 func (l *LogContext) log(level LogLevel, msg string, fields ...Field) {
-	fields = append(fields, l.fields...)
+	if len(fields) > 0 {
+		fields = append(fields, l.fields...)
+	} else {
+		fields = l.fields
+	}
 	l.logger.Write(level, msg, fields...)
 }
 
