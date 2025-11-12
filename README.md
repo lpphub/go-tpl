@@ -1,25 +1,30 @@
-# Go-Tpl - Go Web Application Template
+# Go-Tpl - Production-Grade Go Web Application Template
 
 [![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)](https://golang.org)
 [![Gin](https://img.shields.io/badge/Gin-HTTP%20Framework-green.svg)](https://gin-gonic.com/)
 [![GORM](https://img.shields.io/badge/GORM-ORM-orange.svg)](https://gorm.io/)
+[![RDB](https://img.shields.io/badge/RDB-Cache-red.svg)](https://redis.io/)
+[![JWT](https://img.shields.io/badge/JWT-Authentication-yellow.svg)](https://jwt.io/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-基于清洁架构原则构建的生产级 Go Web 应用模板，具备用户管理、基于角色的访问控制（RBAC）和全面的监控功能。
+基于清洁架构原则和领域驱动设计构建的生产级 Go Web 应用模板，具备完整的用户管理、基于角色的访问控制（RBAC）、依赖注入、监控和日志功能。
 
 ## ✨ 特性
 
-- **清洁架构**: 关注点分离，分层清晰（infra、logic、web）
-- **用户管理**: 完整的 CRUD 操作和角色分配功能
-- **基于角色的访问控制 (RBAC)**: 灵活的权限系统
-- **数据库**: GORM with MySQL 支持和事务管理
-- **缓存**: Redis 集成以优化性能
-- **身份认证**: 基于 JWT 的身份认证，安全的令牌处理
-- **日志记录**: 基于 Zap 的结构化日志和请求上下文
-- **监控**: Prometheus 指标和 pprof 性能分析
-- **配置管理**: 基于 YAML 的配置，支持环境变量覆盖
-- **Docker**: 生产就绪的 Docker 配置
-- **API 文档**: 完整的 REST API 和标准化响应
+- **清洁架构**: 严格分层架构，关注点分离（infra、logic、web）
+- **领域驱动设计**: 按业务域组织代码（user、role、permission）
+- **依赖注入**: 使用 Wire 进行编译时依赖注入
+- **用户管理**: 完整的 CRUD 操作、状态管理、角色分配
+- **基于角色的访问控制 (RBAC)**: 灵活的权限系统，支持细粒度权限控制
+- **数据库**: GORM with MySQL 驱动，完整的事务支持
+- **缓存**: RDB 集成，支持缓存和会话管理
+- **身份认证**: 基于 JWT 的身份认证，bcrypt 密码加密
+- **日志记录**: 基于 Zap 的高性能结构化日志和请求上下文
+- **监控**: Prometheus 指标收集和 pprof 性能分析
+- **配置管理**: 基于 YAML 的配置系统，支持环境变量覆盖
+- **Docker**: 生产就绪的 Docker 配置和部署
+- **API 文档**: 完整的 REST API 和标准化响应格式
+- **测试支持**: 集成测试框架和数据库模拟
 
 ## 🏗️ 架构
 
@@ -28,42 +33,115 @@
 ```
 go-tpl/
 ├── cmd/                    # 应用程序入口点
-│   └── run.go             # 主应用程序引导
+│   └── run.go             # 主应用程序引导和初始化
 ├── config/                # 配置文件
-│   └── conf.yml           # 主配置文件
+│   └── conf.yml           # 主配置文件（YAML格式）
 ├── infra/                 # 基础设施层
-│   ├── config/            # 配置管理
-│   ├── dbs/               # 数据库设置和事务
-│   ├── jwt/               # JWT 令牌处理
-│   ├── logging/           # 日志工具和中间件
-│   └── monitor/           # 监控和分析
+│   ├── config/            # 配置管理和环境变量处理
+│   ├── dbs/               # 数据库连接、事务管理
+│   │   ├── db.go          # MySQL/GORM 初始化
+│   │   ├── transaction.go # 事务管理
+│   │   └── transaction_test.go
+│   ├── jwt/               # JWT 令牌生成和验证
+│   ├── logging/           # 日志基础设施
+│   │   └── logx/          # 自定义日志工具和中间件
+│   └── monitor/           # 监控和性能分析
+│       └── monitor.go     # Prometheus 指标设置
 ├── logic/                 # 业务逻辑层
-│   ├── user/              # 用户域逻辑
-│   ├── role/              # 角色域逻辑
-│   ├── permission/        # 权限域逻辑
-│   └── shared/            # 共享工具和常量
+│   ├── user/              # 用户域
+│   │   ├── model.go       # 用户数据模型
+│   │   └── service.go     # 用户业务逻辑
+│   ├── role/              # 角色域
+│   ├── permission/        # 权限域
+│   ├── shared/            # 共享工具
+│   │   ├── consts.go      # 应用常量
+│   │   ├── errors.go      # 错误处理
+│   │   └── pagination.go # 分页工具
+│   ├── init.go            # 逻辑层初始化
+│   ├── wire.go            # Wire 依赖注入配置
+│   └── wire_gen.go        # 生成的 Wire 代码
 ├── web/                   # Web 层
-│   ├── base/              # 基础工具和响应
+│   ├── base/              # 基础工具
+│   │   └── render.go      # 标准化响应渲染
 │   ├── middleware/        # HTTP 中间件
 │   ├── rest/              # REST API 处理器
 │   │   ├── user/          # 用户 API 端点
 │   │   ├── role/          # 角色 API 端点
 │   │   └── permission/    # 权限 API 端点
-│   ├── types/             # 请求/响应类型
-│   └── router.go          # 路由配置
+│   ├── types/             # 请求/响应类型定义
+│   └── router.go          # 路由配置和注册
+├── scripts/               # 实用脚本
 ├── Dockerfile             # Docker 配置
-├── go.mod                 # Go 模块文件
+├── go.mod                 # Go 模块依赖
+├── go.sum                 # 依赖校验和
+├── CLAUDE.md              # Claude Code 开发指南
 └── README.md              # 本文件
 ```
 
 ### 核心组件
 
-- **主入口**: `cmd/run.go` - 应用程序引导和初始化
-- **配置**: `infra/config/config.go` - 基于 YAML 的配置，支持环境变量覆盖
-- **数据库**: GORM with MySQL 驱动，通过 `infra.DB` 访问
-- **缓存**: Redis 客户端，通过 `infra.Redis` 访问
-- **日志**: 基于 Zap 的结构化日志和自定义中间件
-- **HTTP 框架**: Gin 和自定义响应工具
+- **主入口**: `cmd/run.go` - 应用程序引导，遵循 4 步初始化流程
+- **配置管理**: `infra/config/config.go` - 基于 YAML 的配置，支持环境变量覆盖
+- **数据库层**: GORM with MySQL 驱动，通过 `infra.DB` 访问，支持事务
+- **缓存层**: RDB 客户端，通过 `infra.RDB` 访问
+- **日志系统**: 基于 Zap 的高性能结构化日志和自定义 logx 工具
+- **依赖注入**: Wire 编译时依赖注入，清晰的依赖流向
+- **监控系统**: Prometheus 指标收集和 pprof 性能分析
+- **身份认证**: JWT-based 认证，bcrypt 密码加密
+- **HTTP 框架**: Gin Web 框架和自定义响应工具
+
+### 初始化流程
+
+1. **基础设施初始化** (`infra.Init()`)
+   - 加载配置文件和环境变量
+   - 设置日志系统
+   - 初始化数据库连接和 RDB
+   - 配置 JWT 和其他基础设施组件
+
+2. **业务逻辑初始化** (`logic.Init()`)
+   - 使用 Wire 进行依赖注入
+   - 初始化各域服务 (User, Role, Permission)
+   - 设置业务逻辑层依赖关系
+
+3. **Web 层设置** (`web.SetupRouter()`)
+   - 配置 HTTP 路由和中间件
+   - 注册各域 API 端点
+   - 设置请求处理器
+
+4. **监控启动** (`monitor.SetupMetrics()`)
+   - 启动 Prometheus 指标收集
+   - 配置性能分析端点
+   - 开始 HTTP 服务器 (端口 8080)
+
+### 技术栈
+
+#### 核心框架
+- **Go 1.25** - 编程语言
+- **Gin v1.11.0** - HTTP Web 框架
+- **GORM v1.31.0** - ORM 库
+
+#### 数据存储
+- **MySQL** - 主数据库
+- **RDB v9.16.0** - 缓存和会话存储
+- **GORM MySQL Driver v1.6.0** - MySQL 数据库驱动
+
+#### 身份认证与安全
+- **JWT v5.3.0** - 令牌认证
+- **bcrypt** - 密码哈希
+
+#### 依赖注入与配置
+- **Wire v0.7.0** - 编译时依赖注入
+- **goccy/go-yaml v1.18.0** - YAML 配置解析
+
+#### 日志与监控
+- **Zap v1.27.0** - 高性能结构化日志
+- **Prometheus v1.23.2** - 指标收集
+- **fgprof v0.9.5** - 性能分析
+
+#### 测试与开发工具
+- **testify v1.11.1** - 测试框架
+- **go-sqlmock v1.5.2** - 数据库模拟
+- **pprof** - 性能分析
 
 ## 🚀 快速开始
 
@@ -71,7 +149,7 @@ go-tpl/
 
 - Go 1.25+
 - MySQL 8.0+
-- Redis 6.0+
+- RDB 6.0+
 - Docker（可选）
 
 ### 安装
@@ -90,7 +168,7 @@ go mod tidy
 3. **配置应用程序**
 ```bash
 cp config/conf.yml.example config/conf.yml
-# 编辑 config/conf.yml 设置您的数据库和 Redis 配置
+# 编辑 config/conf.yml 设置您的数据库和 RDB 配置
 ```
 
 4. **运行应用程序**
@@ -138,7 +216,7 @@ database:
 - `DB_PASSWORD`
 - `DB_NAME`
 
-### Redis 配置
+### RDB 配置
 ```yaml
 redis:
   host: 127.0.0.1
@@ -526,7 +604,7 @@ Authorization: Bearer <your-jwt-token>
 
 ## 🛠️ 开发
 
-### 构建命令
+### 构建和运行
 ```bash
 # 构建应用程序
 go build -o myapp .
@@ -536,6 +614,28 @@ go run .
 
 # 运行特定模块
 go run cmd/run.go
+
+# 生成 Wire 依赖
+go generate ./logic
+
+# 使用 Wire 生成依赖
+wire ./logic/
+```
+
+### 测试
+```bash
+# 运行所有测试
+go test ./...
+
+# 运行测试并生成覆盖率报告
+go test -cover ./...
+
+# 运行特定包的测试
+go test ./infra/dbs/...
+go test ./logic/user/...
+
+# 运行基准测试
+go test -bench=. ./...
 ```
 
 ### 开发工具
@@ -552,11 +652,11 @@ go mod tidy
 # 下载依赖
 go mod download
 
-# 运行测试
-go test ./...
+# 更新依赖
+go get -u ./...
 
-# 运行测试并生成覆盖率报告
-go test -cover ./...
+# 查看依赖图
+go mod graph
 ```
 
 ### 监控与调试
@@ -566,24 +666,133 @@ go test -cover ./...
 - **指标**: `http://localhost:8080/metrics` (Prometheus 格式)
 - **性能分析**: `http://localhost:8080/debug/pprof/` (Go pprof)
 
-### 添加新功能
+## 🏛️ 领域模型
 
-1. **新域**: 创建 `logic/{domain}/` 和 `web/rest/{domain}/` 目录
-2. **服务**: 在 `logic/{domain}/service.go` 中添加服务并在 `logic/init.go` 中初始化
-3. **HTTP 层**: 在 `web/rest/{domain}/` 中添加 `handler.go` 和 `route.go`
-4. **注册**: 在 `web/router.go` 中添加域注册
+### 用户管理 (User Domain)
+- **完整的 CRUD 操作**: 创建、读取、更新、删除用户
+- **状态管理**: 支持用户启用/禁用状态
+- **密码安全**: 使用 bcrypt 进行密码哈希
+- **角色关联**: 用户可以分配多个角色
+- **数据验证**: 用户名、邮箱格式验证
+
+### 角色系统 (Role Domain)
+- **角色管理**: 创建、更新、删除角色
+- **权限分配**: 角色可以拥有多个权限
+- **层级关系**: 支持角色间的层级关系
+- **状态控制**: 角色启用/禁用功能
+
+### 权限系统 (Permission Domain)
+- **细粒度权限**: 基于 资源-操作 的权限模型
+- **模块化组织**: 权限按业务模块分组
+- **动态权限**: 支持运行时权限检查
+- **权限继承**: 通过角色继承权限
+
+### 共享组件 (Shared Components)
+- **常量定义**: 统一的业务常量
+- **错误处理**: 标准化的错误码和消息
+- **分页工具**: 通用的分页查询支持
+
+## 🔧 添加新功能
+
+### 1. 创建新域
+```bash
+# 创建领域目录
+mkdir -p logic/{newdomain}
+mkdir -p web/rest/{newdomain}
+```
+
+### 2. 实现数据模型
+在 `logic/{newdomain}/model.go` 中定义：
+```go
+type NewDomain struct {
+    ID        uint      `gorm:"primaryKey" json:"id"`
+    Name      string    `gorm:"size:100;not null" json:"name"`
+    Status    int       `gorm:"default:1" json:"status"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
+    DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+```
+
+### 3. 实现服务层
+在 `logic/{newdomain}/service.go` 中：
+```go
+type NewDomainSvc struct {
+    db *gorm.DB
+    redis *redis.Client
+}
+
+// 实现业务逻辑方法
+func (s *NewDomainSvc) Create(req *CreateNewDomainReq) error {
+    // 业务逻辑实现
+}
+```
+
+### 4. 配置依赖注入
+在 `logic/wire.go` 中添加：
+```go
+var NewDomainSet = wire.NewSet(
+    // 添加服务提供者
+    wire.Bind((*NewDomainInterface)(nil), (*NewDomainSvc)(nil)),
+)
+```
+
+### 5. 生成 Wire 代码
+```bash
+go generate ./logic
+# 或
+wire ./logic/
+```
+
+### 6. 实现 HTTP 处理器
+在 `web/rest/{newdomain}/handler.go` 中实现 API 处理器
+
+### 7. 配置路由
+在 `web/rest/{newdomain}/route.go` 中定义路由，并在 `web/router.go` 中注册
+
+### 8. 添加测试
+为每个层次添加单元测试和集成测试
 
 ## 📦 依赖
 
-主要外部依赖：
-- `github.com/gin-gonic/gin` - HTTP 框架
-- `gorm.io/gorm` - ORM
-- `github.com/redis/go-redis/v9` - Redis 客户端
-- `go.uber.org/zap` - 结构化日志
-- `github.com/goccy/go-yaml` - YAML 解析
-- `github.com/prometheus/client_golang` - 指标
-- `github.com/golang-jwt/jwt/v5` - JWT 身份认证
-- `golang.org/x/crypto` - 加密函数
+### 核心依赖
+- `github.com/gin-gonic/gin v1.11.0` - HTTP Web 框架
+- `gorm.io/gorm v1.31.0` - ORM 库
+- `gorm.io/driver/mysql v1.6.0` - MySQL 数据库驱动
+- `github.com/redis/go-redis/v9 v9.16.0` - RDB 客户端
+- `go.uber.org/zap v1.27.0` - 高性能结构化日志
+
+### 身份认证与安全
+- `github.com/golang-jwt/jwt/v5 v5.3.0` - JWT 令牌处理
+- `golang.org/x/crypto v0.43.0` - 加密函数 (bcrypt)
+
+### 依赖注入与配置
+- `github.com/google/wire v0.7.0` - 编译时依赖注入
+- `github.com/goccy/go-yaml v1.18.0` - YAML 配置解析
+
+### 监控与日志
+- `github.com/prometheus/client_golang v1.23.2` - Prometheus 指标收集
+- `gopkg.in/natefinch/lumberjack.v2 v2.2.1` - 日志轮转
+
+### 测试工具
+- `github.com/stretchr/testify v1.11.1` - 测试框架
+- `github.com/DATA-DOG/go-sqlmock v1.5.2` - 数据库模拟
+- `go.uber.org/mock v0.6.0` - Mock 生成工具
+
+### 性能分析
+- `github.com/felixge/fgprof v0.9.5` - 连续性能分析
+- `github.com/google/pprof` - Go 性能分析工具
+
+### 间接依赖
+项目还包含多个间接依赖，用于支持：
+- JSON 序列化/反序列化 (`github.com/goccy/go-json`)
+- HTTP/2 和 QUIC 支持
+- 数据验证 (`github.com/go-playground/validator/v10`)
+- 国际化支持 (`github.com/go-playground/locales`)
+- 配置文件解析 (`github.com/pelletier/go-toml/v2`)
+- 等
+
+所有依赖都在 `go.mod` 文件中定义，确保版本锁定和构建可重现性。
 
 ## 🤝 贡献
 

@@ -2,6 +2,7 @@ package logx
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go-tpl/infra/logging"
 	"net"
@@ -19,7 +20,7 @@ type RedisLogger struct {
 // NewRedisLogger 创建新的Redis日志记录器
 func NewRedisLogger() *RedisLogger {
 	return &RedisLogger{
-		logger: logging.GetLogger().WithCaller(1),
+		logger: logging.GetLogger().WithCaller(2),
 	}
 }
 
@@ -57,18 +58,18 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		// 添加字段
 		fields := []logging.Field{
 			{Key: "event", Value: "redis_command"},
-			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 			{Key: "command", Value: cmdStr},
+			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 		}
 
 		// 添加上下文字段
-		fields = append(fields, logging.WithContext(ctx).Fields...)
+		fields = append(fields, logging.WithContext(ctx).GetFields()...)
 
 		// 根据是否有错误确定日志级别和消息
 		msg := "redis command success"
 		level := logging.InfoLevel
 
-		if err != nil {
+		if err != nil && !errors.Is(err, redis.Nil) {
 			msg = fmt.Sprintf("redis command failed: %v", err)
 			level = logging.ErrorLevel
 		}
@@ -99,7 +100,7 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 			{Key: "duration_ms", Value: elapsed.Milliseconds()},
 		}
 
-		fields = append(fields, logging.WithContext(ctx).Fields...)
+		fields = append(fields, logging.WithContext(ctx).GetFields()...)
 
 		if err != nil {
 			l.logger.Write(logging.ErrorLevel, fmt.Sprintf("redis pipeline failed: %v", err), fields...)

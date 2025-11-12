@@ -21,8 +21,8 @@ type Service struct {
 }
 
 var providerSet = wire.NewSet(
-	wire.Value(infra.DB),    // 提供DB
-	wire.Value(infra.Redis), // 提供Redis
+	infra.ProvideDB,    // 提供DB
+	infra.ProvideRedis, // 提供Redis
 )
 
 var svcSet = wire.NewSet(
@@ -32,6 +32,6 @@ var svcSet = wire.NewSet(
 )
 
 func initialize() *Service {
-	wire.Build(wire.Struct(new(Service), "*"), providerSet, svcSet)
+	wire.Build(providerSet, svcSet, wire.Struct(new(Service), "*"))
 	return nil
 }

@@ -43,3 +43,10 @@ func Init(opts ...Option) error {
 func GetLogger() Logger {
 	return globalLogger
 }
+
+func WithField(key string, value interface{}) Field {
+	return Field{
+		Key:   key,
+		Value: value,
+	}
+}

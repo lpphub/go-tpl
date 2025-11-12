@@ -15,7 +15,7 @@ import (
 func List(c *gin.Context) {
 	var req types.UserQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logging.Errorf(c, "Invalid request: %v", err)
+		logging.Errorw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
@@ -34,7 +34,7 @@ func List(c *gin.Context) {
 func Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logging.Errorw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}

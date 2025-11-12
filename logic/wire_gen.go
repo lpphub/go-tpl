@@ -17,8 +17,8 @@ import (
 // Injectors from wire.go:
 
 func initialize() *Service {
-	db := _wireDBValue
-	client := _wireClientValue
+	db := infra.ProvideDB()
+	client := infra.ProvideRedis()
 	service := user.NewService(db, client)
 	roleService := role.NewService(db)
 	permissionService := permission.NewService(db)
@@ -30,11 +30,6 @@ func initialize() *Service {
 	return logicService
 }
 
-var (
-	_wireDBValue     = infra.DB
-	_wireClientValue = infra.Redis
-)
-
 // wire.go:
 
 type Service struct {
@@ -43,6 +38,6 @@ type Service struct {
 	Permission *permission.Service
 }
 
-var providerSet = wire.NewSet(wire.Value(infra.DB), wire.Value(infra.Redis))
+var providerSet = wire.NewSet(infra.ProvideDB, infra.ProvideRedis)
 
 var svcSet = wire.NewSet(user.NewService, role.NewService, permission.NewService)
