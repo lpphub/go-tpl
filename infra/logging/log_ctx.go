@@ -9,7 +9,7 @@ type LogContext struct {
 	context.Context
 
 	logger Logger
-	fields []Field
+	Fields []Field
 }
 
 type ctxConvertor func(ctx context.Context) context.Context
@@ -27,7 +27,7 @@ func WithContext(ctx context.Context, fields ...Field) *LogContext {
 	}
 	c := withContext(ctx)
 	if len(fields) > 0 {
-		c.fields = append(c.fields, fields...)
+		c.Fields = append(c.Fields, fields...)
 	}
 	return c
 }
@@ -56,15 +56,11 @@ func withContext(ctx context.Context) *LogContext {
 	}
 }
 
-func (l *LogContext) GetFields() []Field {
-	return l.fields
-}
-
 func (l *LogContext) log(level LogLevel, msg string, fields ...Field) {
 	if len(fields) > 0 {
-		fields = append(fields, l.fields...)
+		fields = append(fields, l.Fields...)
 	} else {
-		fields = l.fields
+		fields = l.Fields
 	}
 	l.logger.Write(level, msg, fields...)
 }
