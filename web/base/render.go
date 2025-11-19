@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func OK(ctx *gin.Context) {
@@ -42,9 +43,13 @@ func FailWithError(ctx *gin.Context, err error) {
 	var e shared.Error
 	if ok := errors.As(err, &e); ok {
 		Fail(ctx, e.Code, e.Error())
-	} else {
-		FailWithErr(ctx, shared.ErrServerError.Code, err)
+		return
 	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		FailWithError(ctx, shared.ErrRecordNotFound)
+		return
+	}
+	Fail(ctx, shared.ErrServerError.Code, err.Error())
 }
 
 func FailWithStatus(ctx *gin.Context, statusCode int, err error) {
