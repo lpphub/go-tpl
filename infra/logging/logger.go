@@ -34,7 +34,7 @@ func Init(opts ...Option) error {
 	}
 
 	var err error
-	globalLogger, err = setupZapLogger(cfg) // 使用zap作为默认日志库
+	globalLogger, err = setupZeroLogger(cfg) // 使用zerolog作为默认日志库
 	if err != nil {
 		return fmt.Errorf("log: create logger failed: %v", err)
 	}
