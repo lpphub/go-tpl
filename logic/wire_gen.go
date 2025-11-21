@@ -18,7 +18,7 @@ import (
 
 func initialize() *Service {
 	db := infra.ProvideDB()
-	client := infra.ProvideRedis()
+	client := infra.ProvideRDB()
 	service := user.NewService(db, client)
 	roleService := role.NewService(db)
 	permissionService := permission.NewService(db)
@@ -38,6 +38,6 @@ type Service struct {
 	Permission *permission.Service
 }
 
-var providerSet = wire.NewSet(infra.ProvideDB, infra.ProvideRedis)
+var providerSet = wire.NewSet(infra.ProvideDB, infra.ProvideRDB)
 
 var svcSet = wire.NewSet(user.NewService, role.NewService, permission.NewService)

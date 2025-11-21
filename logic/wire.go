@@ -21,8 +21,8 @@ type Service struct {
 }
 
 var providerSet = wire.NewSet(
-	infra.ProvideDB,    // 提供DB
-	infra.ProvideRedis, // 提供Redis
+	infra.ProvideDB,  // 提供DB
+	infra.ProvideRDB, // 提供Redis
 )
 
 var svcSet = wire.NewSet(

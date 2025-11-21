@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	Cfg   *config.Config
-	DB    *gorm.DB
-	Redis *redis.Client
+	Cfg *config.Config
+	DB  *gorm.DB
+	RDB *redis.Client
 )
 
 func Init() {
@@ -33,7 +33,7 @@ func Init() {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	Redis, err = dbs.NewRedis(Cfg.Redis)
+	RDB, err = dbs.NewRedis(Cfg.Redis)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to redis: %v", err))
 	}
@@ -44,6 +44,6 @@ func ProvideDB() *gorm.DB {
 	return DB
 }
 
-func ProvideRedis() *redis.Client {
-	return Redis
+func ProvideRDB() *redis.Client {
+	return RDB
 }
