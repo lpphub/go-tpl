@@ -1,6 +1,7 @@
 package user
 
 import (
+	"go-tpl/infra/logger"
 	"go-tpl/infra/logging"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
@@ -15,14 +16,14 @@ import (
 func List(c *gin.Context) {
 	var req types.UserQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logging.Errorw(c, err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	data, err := logic.Svc.User.List(c, req)
 	if err != nil {
-		logging.Errorf(c, "Failed to get user list: %v", err)
+		logger.Errorf(c, "Failed to get user list: %v", err)
 		base.FailWithError(c, err)
 		return
 	}

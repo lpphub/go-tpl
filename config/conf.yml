@@ -1,14 +1,14 @@
 database:
-  host: 127.0.0.1
+  host: 182.254.243.143
   port: 3306
   dbname: app_db
-  user: root
-  password: 123456
+  user: test
+  password: D7p6ZkcJRMynPfCy
 
 redis:
-  host: 127.0.0.1
+  host: 182.254.243.143
   port: 6379
-  password: ""
+  password: "32wB6ejWwb78cPKT"
   db: 0
 
 jwt:

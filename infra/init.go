@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-tpl/infra/config"
 	"go-tpl/infra/dbs"
-	"go-tpl/infra/logging"
+	"go-tpl/infra/logger"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -25,7 +25,7 @@ func Init() {
 	}
 
 	// 2.配置日志
-	_ = logging.Init()
+	_ = logger.Init()
 
 	// 3.初始化数据库和Redis
 	DB, err = dbs.NewMysqlDB(Cfg.Database)

@@ -3,6 +3,7 @@ package rest
 import (
 	"errors"
 	"go-tpl/infra/jwt"
+	"go-tpl/infra/logger"
 	"go-tpl/infra/logging"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
@@ -13,13 +14,13 @@ import (
 )
 
 func Test(c *gin.Context) {
-	logging.Info(c, "test1")
+	logger.Info(c, "test1")
 
-	logging.Info(c.Request.Context(), "test2")
+	logger.Info(c.Request.Context(), "test2")
 
-	logging.Info(c, "test3")
+	logger.Info(c.Request.Context(), "test3")
 
-	logging.Errorw(c, errors.New("test"))
+	logger.Errw(c, errors.New("test"))
 
 	base.OKWithData(c, "ok")
 }
