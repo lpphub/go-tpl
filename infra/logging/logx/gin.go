@@ -19,9 +19,10 @@ func init() {
 		if gCtx, ok := ctx.(*gin.Context); ok {
 			return gCtx.Request.Context()
 		}
-		return nil
+		return ctx
 	})
 }
+
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		logCtx := logging.WithContext(c.Request.Context(), logging.WithField("log_id", getLogIDFromGin(c)))
