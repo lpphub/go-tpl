@@ -31,6 +31,8 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 		list  []User
 	)
 
+	_ = s.redis.Get(ctx, "user_list")
+
 	_db := s.db.WithContext(ctx).Model(&User{})
 	if req.Username != "" {
 		_db = _db.Where("username like ?", "%"+req.Username+"%")
