@@ -73,7 +73,7 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	}
 
 	// 添加上下文字段
-	fields = append(fields, logging.WithContext(ctx).Fields...)
+	fields = append(fields, logging.FromContext(ctx).Fields...)
 
 	msg := "sql do success"
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
