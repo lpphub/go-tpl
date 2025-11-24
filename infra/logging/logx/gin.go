@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/logging"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,7 +43,11 @@ func getLogIDFromGin(ctx *gin.Context) string {
 	}
 
 	if logId == "" {
-		logId = logging.GenerateLogID()
+		logId = GenerateLogID()
 	}
 	return logId
+}
+
+func GenerateLogID() string {
+	return strconv.FormatUint(uint64(time.Now().UnixNano())&0x7FFFFFFF|0x80000000, 10)
 }
