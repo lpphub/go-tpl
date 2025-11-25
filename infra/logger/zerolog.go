@@ -1,9 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -14,9 +15,7 @@ type zeroLogger struct{ core zerolog.Logger }
 func newZeroLogger(cfg *config) Logger {
 	// default config
 	zerolog.TimeFieldFormat = time.RFC3339
-	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
-		return filepath.Base(file) + ":" + strconv.Itoa(line)
-	}
+	zerolog.CallerMarshalFunc = callerShortFunc
 	output := os.Stdout
 
 	l := zerolog.New(output).With().Timestamp().Logger().Level(zerolog.Level(cfg.level))
@@ -102,4 +101,13 @@ func (z *zeroLogger) withField(c zerolog.Context, f Field) zerolog.Context {
 	default:
 		return c.Interface(f.Key, v)
 	}
+}
+
+func callerShortFunc(_ uintptr, file string, line int) string {
+	file = filepath.ToSlash(file)
+	parts := strings.Split(file, "/")
+	if len(parts) > 2 {
+		file = strings.Join(parts[len(parts)-2:], "/")
+	}
+	return fmt.Sprintf("%s:%d", file, line)
 }
