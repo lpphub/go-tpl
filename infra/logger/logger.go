@@ -19,20 +19,20 @@ const (
 
 // Field 日志字段
 type Field struct {
-	K string
-	V any
+	Key   string
+	Value any
 }
 
 // Logger 日志接口 - 只有两个核心方法
 type Logger interface {
 	// Log 输出日志
 	Log(level Level, msg string, fields ...Field)
-	Logd(depth int, level Level, msg string, fields ...Field)
+	Logc(callerSkip int, level Level, msg string, fields ...Field)
 
 	// With 创建新的Logger
 	With(fields ...Field) Logger
-	// WithCallerSkip 创建新的Logger, 设置调用栈跳过层数
-	WithCallerSkip(skip int) Logger
+	// WithCaller 创建新的Logger, 设置调用栈跳过层数
+	WithCaller(skip int) Logger
 }
 
 func New(opts ...Option) Logger {
@@ -78,9 +78,10 @@ func applyConfig(opts ...Option) *config {
 func WithLevel(l Level) Option      { return func(c *config) { c.level = l } }
 func WithOutput(w io.Writer) Option { return func(c *config) { c.output = w } }
 
-func Str(k, v string) Field         { return Field{k, v} }
-func Int(k string, v int) Field     { return Field{k, v} }
-func Int64(k string, v int64) Field { return Field{k, v} }
-func Bool(k string, v bool) Field   { return Field{k, v} }
-func Err(e error) Field             { return Field{"error", e} }
-func Any(k string, v any) Field     { return Field{k, v} }
+func Str(k, v string) Field             { return Field{k, v} }
+func Int(k string, v int) Field         { return Field{k, v} }
+func Int64(k string, v int64) Field     { return Field{k, v} }
+func Float64(k string, v float64) Field { return Field{k, v} }
+func Bool(k string, v bool) Field       { return Field{k, v} }
+func Err(e error) Field                 { return Field{"error", e} }
+func Any(k string, v any) Field         { return Field{k, v} }

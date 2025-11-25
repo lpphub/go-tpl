@@ -33,11 +33,16 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 	)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	_ = s.redis.Get(ctx, "user_list")
 =======
 	get := s.redis.Get(ctx, "get list")
 	logger.Info(ctx, "get list test:"+get.String())
 >>>>>>> feat/zerolog
+=======
+	get := s.redis.Get(ctx, "user_list")
+	logger.Info(ctx, "get rdb: "+get.String())
+>>>>>>> main
 
 	_db := s.db.WithContext(ctx).Model(&User{})
 	if req.Username != "" {

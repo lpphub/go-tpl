@@ -28,13 +28,13 @@ func (l *RedisLogger) DialHook(next redis.DialHook) redis.DialHook {
 
 		fields := []logger.Field{
 			logger.Str("addr", addr),
-			logger.Str("duration", fmtDuration(elapsed)),
+			logger.Str("duration", l.fmtDuration(elapsed)),
 		}
 
 		if err != nil {
-			l.logger(ctx).Logd(3, logger.ERROR, fmt.Sprintf("redis connected failed: %v", err), fields...)
+			l.logger(ctx).Logc(3, logger.ERROR, fmt.Sprintf("redis connected failed: %v", err), fields...)
 		} else {
-			l.logger(ctx).Logd(3, logger.INFO, "redis connected", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis connected", fields...)
 		}
 
 		return conn, err
@@ -51,16 +51,16 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		// 添加字段
 		fields := []logger.Field{
 			logger.Str("cmd", l.buildCmd(cmd)),
-			logger.Str("duration", fmtDuration(elapsed)),
+			logger.Str("duration", l.fmtDuration(elapsed)),
 		}
 
 		switch {
 		case err != nil && !errors.Is(err, redis.Nil):
-			l.logger(ctx).Logd(3, logger.ERROR, "redis error", append(fields, logger.Err(err))...)
+			l.logger(ctx).Logc(3, logger.ERROR, "redis error", append(fields, logger.Err(err))...)
 		case elapsed > 100*time.Millisecond:
-			l.logger(ctx).Logd(3, logger.WARN, "redis slow", fields...)
+			l.logger(ctx).Logc(3, logger.WARN, "redis slow", fields...)
 		default:
-			l.logger(ctx).Logd(3, logger.INFO, "redis success", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis success", fields...)
 		}
 		return err
 	}
@@ -76,16 +76,16 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 		// 记录管道执行的整体信息
 		fields := []logger.Field{
 			logger.Str("cmd", l.buildPipelineCmd(cmds)),
-			logger.Str("duration", fmtDuration(elapsed)),
+			logger.Str("duration", l.fmtDuration(elapsed)),
 		}
 
 		switch {
 		case err != nil && !errors.Is(err, redis.Nil):
-			l.logger(ctx).Logd(3, logger.ERROR, "redis pipeline error", append(fields, logger.Err(err))...)
+			l.logger(ctx).Logc(3, logger.ERROR, "redis pipeline error", append(fields, logger.Err(err))...)
 		case elapsed > 100*time.Millisecond:
-			l.logger(ctx).Logd(3, logger.WARN, "redis pipeline slow", fields...)
+			l.logger(ctx).Logc(3, logger.WARN, "redis pipeline slow", fields...)
 		default:
-			l.logger(ctx).Logd(3, logger.INFO, "redis pipeline success", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis pipeline success", fields...)
 		}
 
 		return err
@@ -136,7 +136,14 @@ func (l *RedisLogger) buildPipelineCmd(cmds []redis.Cmder) string {
 	return sb.String()
 }
 
-func fmtDuration(d time.Duration) string {
+func (l *RedisLogger) logger(ctx context.Context) logger.Logger {
+	if cl := logger.Ctx(ctx); cl != nil {
+		return cl
+	}
+	return logger.Default()
+}
+
+func (l *RedisLogger) fmtDuration(d time.Duration) string {
 	return fmt.Sprintf("%.3fms", float64(d.Nanoseconds())/1e6)
 }
 
@@ -159,11 +166,4 @@ func (l *RedisLogger) isSensitiveCommand(cmdName string) bool {
 		"RESTORE": true,
 	}
 	return sensitiveCommands[cmdName]
-}
-
-func (l *RedisLogger) logger(ctx context.Context) logger.Logger {
-	if cl := logger.Ctx(ctx); cl != nil {
-		return cl
-	}
-	return logger.Default()
 }

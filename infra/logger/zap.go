@@ -42,7 +42,7 @@ func (z *zapLogger) Log(level Level, msg string, fields ...Field) {
 	z.core.Log(lvl, msg, zapFields...)
 }
 
-func (z *zapLogger) Logd(_ int, level Level, msg string, fields ...Field) {
+func (z *zapLogger) Logc(_ int, level Level, msg string, fields ...Field) {
 	z.Log(level, msg, fields...)
 }
 
@@ -52,14 +52,14 @@ func (z *zapLogger) With(fields ...Field) Logger {
 
 }
 
-func (z *zapLogger) WithCallerSkip(skip int) Logger {
+func (z *zapLogger) WithCaller(skip int) Logger {
 	return &zapLogger{core: z.core.WithOptions(zap.AddCaller(), zap.AddCallerSkip(skip))}
 }
 
 func (z *zapLogger) getZapField(fields []Field) []zap.Field {
 	zapFields := make([]zap.Field, len(fields), len(fields))
 	for i, field := range fields {
-		zapFields[i] = zap.Any(field.K, field.V)
+		zapFields[i] = zap.Any(field.Key, field.Value)
 	}
 	return zapFields
 }
