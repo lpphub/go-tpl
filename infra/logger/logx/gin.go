@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"context"
 	"fmt"
 	"go-tpl/infra/logger"
 	"strconv"
@@ -12,6 +13,15 @@ import (
 const (
 	LogIDHeader = "X-Trace-logId"
 )
+
+func init() {
+	logger.RegisterCtxAdapter(func(ctx context.Context) context.Context {
+		if gCtx, ok := ctx.(*gin.Context); ok {
+			return gCtx.Request.Context()
+		}
+		return ctx
+	})
+}
 
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
