@@ -11,7 +11,7 @@ var (
 )
 
 func Init(opts ...Option) {
-	std = New(opts...).WithCallerSkip(3)
+	std = New(opts...).WithCallerSkip(2)
 }
 
 // Default 获取全局 Logger

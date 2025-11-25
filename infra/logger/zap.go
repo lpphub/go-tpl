@@ -53,7 +53,7 @@ func (z *zapLogger) With(fields ...Field) Logger {
 }
 
 func (z *zapLogger) WithCallerSkip(skip int) Logger {
-	return &zapLogger{core: z.core.WithOptions(zap.AddCallerSkip(skip))}
+	return &zapLogger{core: z.core.WithOptions(zap.AddCaller(), zap.AddCallerSkip(skip))}
 }
 
 func (z *zapLogger) getZapField(fields []Field) []zap.Field {

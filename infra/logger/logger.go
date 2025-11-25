@@ -36,7 +36,7 @@ type Logger interface {
 }
 
 func New(opts ...Option) Logger {
-	c := defaultConfig(opts...)
+	c := applyConfig(opts...)
 	return newZapLogger(c)
 }
 
@@ -67,7 +67,7 @@ type config struct {
 }
 type Option func(*config)
 
-func defaultConfig(opts ...Option) *config {
+func applyConfig(opts ...Option) *config {
 	c := &config{level: INFO, output: os.Stdout}
 	for _, o := range opts {
 		o(c)
