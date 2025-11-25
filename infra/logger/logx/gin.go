@@ -3,22 +3,23 @@ package logx
 import (
 	"fmt"
 	"go-tpl/infra/logger"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 const (
-	LogIDHeader = "X-Trace-LogID"
+	LogIDHeader = "X-Trace-logId"
 )
 
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logCtx := logger.WithField(c.Request.Context(), "log_id", getLogIDFromGin(c))
+		ctx := logger.WithCtx(c.Request.Context(), logger.Str("logId", getLogIDFromGin(c)))
+		c.Request = c.Request.WithContext(ctx)
 
-		logger.Info(logCtx, "gin request",
+		logger.Info(ctx, "gin request",
 			logger.Str("path", fmt.Sprintf("[%s %s]", c.Request.Method, c.Request.RequestURI)))
-
-		c.Request = c.Request.WithContext(logCtx)
 
 		c.Next()
 	}
@@ -32,7 +33,11 @@ func getLogIDFromGin(ctx *gin.Context) string {
 	}
 
 	if logId == "" {
-		logId = logger.GenerateLogID()
+		logId = GenerateLogID()
 	}
 	return logId
+}
+
+func GenerateLogID() string {
+	return strconv.FormatUint(uint64(time.Now().UnixNano())&0x7FFFFFFF|0x80000000, 10)
 }

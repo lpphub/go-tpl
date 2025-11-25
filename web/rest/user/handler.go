@@ -2,7 +2,6 @@ package user
 
 import (
 	"go-tpl/infra/logger"
-	"go-tpl/infra/logging"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
 	"go-tpl/web/base"
@@ -16,14 +15,14 @@ import (
 func List(c *gin.Context) {
 	var req types.UserQueryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logger.Errw(c, err)
+		logger.Errw(c.Request.Context(), err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
-	data, err := logic.Svc.User.List(c, req)
+	data, err := logic.Svc.User.List(c.Request.Context(), req)
 	if err != nil {
-		logger.Errorf(c, "Failed to get user list: %v", err)
+		logger.Errw(c.Request.Context(), err)
 		base.FailWithError(c, err)
 		return
 	}
@@ -35,14 +34,14 @@ func List(c *gin.Context) {
 func Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorw(c, err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	user, err := logic.Svc.User.Get(c, uint(id))
 	if err != nil {
-		logging.Errorf(c, "Failed to get user: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
@@ -54,19 +53,17 @@ func Get(c *gin.Context) {
 func Create(c *gin.Context) {
 	var req types.CreateUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		logging.Errorf(c, "Invalid request: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	user, err := logic.Svc.User.Create(c, req)
 	if err != nil {
-		logging.Errorf(c, "Failed to create user: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
-
-	logging.Errorf(c, "User created successfully: %d", user.ID)
 	base.OKWithData(c, user)
 }
 
@@ -74,26 +71,24 @@ func Create(c *gin.Context) {
 func Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.UpdateUserReq
 	if err = c.ShouldBindJSON(&req); err != nil {
-		logging.Errorf(c, "Invalid request: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.Svc.User.Update(c, uint(id), req)
 	if err != nil {
-		logging.Errorf(c, "Failed to update user: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
-
-	logging.Errorf(c, "User updated successfully: %d", id)
 	base.OK(c)
 }
 
@@ -101,19 +96,18 @@ func Update(c *gin.Context) {
 func Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.Svc.User.Delete(c, uint(id))
 	if err != nil {
-		logging.Errorf(c, "Failed to delete user: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
 
-	logging.Errorf(c, "User deleted successfully: %d", id)
 	base.OK(c)
 }
 
@@ -121,26 +115,24 @@ func Delete(c *gin.Context) {
 func UpdateStatus(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.UpdateStatusReq
 	if err = c.ShouldBindJSON(&req); err != nil {
-		logging.Errorf(c, "Invalid request: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.Svc.User.UpdateStatus(c, uint(id), req.Status)
 	if err != nil {
-		logging.Errorf(c, "Failed to update user status: %v", err)
 		base.FailWithError(c, err)
 		return
 	}
 
-	logging.Errorf(c, "User status updated successfully: %d, status: %d", id, req.Status)
 	base.OK(c)
 }
 
@@ -148,14 +140,14 @@ func UpdateStatus(c *gin.Context) {
 func GetUserRoles(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	roleIds, err := logic.Svc.User.GetUserRoles(c, uint(id))
 	if err != nil {
-		logging.Errorf(c, "Failed to get user roles: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
@@ -167,25 +159,24 @@ func GetUserRoles(c *gin.Context) {
 func AssignRoles(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		logging.Errorf(c, "Invalid user id: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	var req types.AssignUserRolesReq
 	if err = c.ShouldBindJSON(&req); err != nil {
-		logging.Errorf(c, "Invalid request: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
 	err = logic.Svc.User.AssignRoles(c, uint(id), req.RoleIds)
 	if err != nil {
-		logging.Errorf(c, "Failed to assign roles: %v", err)
+		logger.Errw(c, err)
 		base.FailWithError(c, err)
 		return
 	}
 
-	logging.Errorf(c, "User roles assigned successfully: %d, roles: %v", id, req.RoleIds)
 	base.OK(c)
 }

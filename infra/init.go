@@ -25,7 +25,7 @@ func Init() {
 	}
 
 	// 2.配置日志
-	_ = logger.Init()
+	logger.Init()
 
 	// 3.初始化数据库和Redis
 	DB, err = dbs.NewMysqlDB(Cfg.Database)

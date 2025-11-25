@@ -1,8 +1,6 @@
-// logger/zerolog.go
 package logger
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,163 +9,93 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type ZeroLogger struct {
-	logger zerolog.Logger
-}
+type zeroLogger struct{ l zerolog.Logger }
 
-func NewZeroLogger(cfg *Config) (*ZeroLogger, error) {
-	w := cfg.Writer
-	if w == nil {
-		w = os.Stdout
-	}
-
+func newZeroLogger(cfg *config) Logger {
+	// default config
 	zerolog.TimeFieldFormat = time.RFC3339
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		return filepath.Base(file) + ":" + strconv.Itoa(line)
 	}
-	logger := zerolog.New(w).
-		With().
-		Timestamp().
-		CallerWithSkipFrameCount(4).
-		Logger().
-		Level(getLevel(cfg.Level))
+	output := os.Stdout
 
-	return &ZeroLogger{logger: logger}, nil
+	l := zerolog.New(output).With().Timestamp().Logger().Level(zerolog.Level(cfg.level))
+	return &zeroLogger{l: l}
 }
 
-func getLevel(level Level) zerolog.Level {
+func (z *zeroLogger) Log(level Level, msg string, fields ...F) {
+	z.Logd(1, level, msg, fields...)
+}
+
+func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...F) {
+	e := z.event(level)
+
+	// skip frame
+	e = e.CallerSkipFrame(depth + 1)
+
+	for _, f := range fields {
+		e = z.addField(e, f)
+	}
+	e.Msg(msg)
+}
+
+func (z *zeroLogger) With(fields ...F) Logger {
+	ctx := z.l.With()
+	for _, f := range fields {
+		ctx = z.withField(ctx, f)
+	}
+	return &zeroLogger{l: ctx.Logger()}
+}
+
+func (z *zeroLogger) WithCallerSkip(skip int) Logger {
+	return &zeroLogger{l: z.l.With().CallerWithSkipFrameCount(skip).Logger()}
+}
+
+func (z *zeroLogger) event(level Level) *zerolog.Event {
 	switch level {
-	case DebugLevel:
-		return zerolog.DebugLevel
-	case InfoLevel:
-		return zerolog.InfoLevel
-	case WarnLevel:
-		return zerolog.WarnLevel
-	case ErrorLevel:
-		return zerolog.ErrorLevel
-	case FatalLevel:
-		return zerolog.FatalLevel
+	case DEBUG:
+		return z.l.Debug()
+	case WARN:
+		return z.l.Warn()
+	case ERROR:
+		return z.l.Error()
+	case FATAL:
+		return z.l.Fatal()
 	default:
-		return zerolog.InfoLevel
+		return z.l.Info()
 	}
 }
 
-func (l *ZeroLogger) getLogger(ctx context.Context) *zerolog.Logger {
-	if ctx == nil {
-		return &l.logger
-	}
-
-	logger := zerolog.Ctx(ctx)
-	if logger.GetLevel() == zerolog.Disabled {
-		return &l.logger
-	}
-
-	return logger
-}
-
-func (l *ZeroLogger) applyFields(event *zerolog.Event, fields []Field) *zerolog.Event {
-	for _, field := range fields {
-		switch field.Type {
-		case StringType:
-			if v, ok := field.Value.(string); ok {
-				event = event.Str(field.Key, v)
-			}
-		case IntType:
-			if v, ok := field.Value.(int); ok {
-				event = event.Int(field.Key, v)
-			}
-		case Int64Type:
-			if v, ok := field.Value.(int64); ok {
-				event = event.Int64(field.Key, v)
-			}
-		case Uint64Type:
-			if v, ok := field.Value.(uint64); ok {
-				event = event.Uint64(field.Key, v)
-			}
-		case BoolType:
-			if v, ok := field.Value.(bool); ok {
-				event = event.Bool(field.Key, v)
-			}
-		case Float64Type:
-			if v, ok := field.Value.(float64); ok {
-				event = event.Float64(field.Key, v)
-			}
-		case DurationType:
-			if v, ok := field.Value.(time.Duration); ok {
-				event = event.Dur(field.Key, v)
-			}
-		case TimeType:
-			if v, ok := field.Value.(time.Time); ok {
-				event = event.Time(field.Key, v)
-			}
-		case ErrorType:
-			if v, ok := field.Value.(error); ok {
-				event = event.AnErr(field.Key, v)
-			}
-		default:
-			event = event.Interface(field.Key, field.Value)
-		}
-	}
-	return event
-}
-
-func (l *ZeroLogger) getEvent(ctx context.Context, level Level) *zerolog.Event {
-	logger := l.getLogger(ctx)
-	switch level {
-	case DebugLevel:
-		return logger.Debug()
-	case InfoLevel:
-		return logger.Info()
-	case WarnLevel:
-		return logger.Warn()
-	case ErrorLevel:
-		return logger.Error()
-	case FatalLevel:
-		return logger.Fatal()
+func (z *zeroLogger) addField(e *zerolog.Event, f F) *zerolog.Event {
+	switch v := f.V.(type) {
+	case string:
+		return e.Str(f.K, v)
+	case int:
+		return e.Int(f.K, v)
+	case int64:
+		return e.Int64(f.K, v)
+	case bool:
+		return e.Bool(f.K, v)
+	case error:
+		return e.AnErr(f.K, v)
 	default:
-		return logger.Info()
+		return e.Interface(f.K, v)
 	}
 }
 
-// Log 实现核心日志方法
-func (l *ZeroLogger) Log(ctx context.Context, level Level, msg string, fields ...Field) {
-	event := l.getEvent(ctx, level)
-	l.applyFields(event, fields).Msg(msg)
-}
-
-// WithContext 将字段添加到 context
-func (l *ZeroLogger) WithContext(ctx context.Context, fields ...Field) context.Context {
-	logger := l.getLogger(ctx)
-	logCtx := logger.With()
-
-	for _, field := range fields {
-		switch field.Type {
-		case StringType:
-			if v, ok := field.Value.(string); ok {
-				logCtx = logCtx.Str(field.Key, v)
-			}
-		case IntType:
-			if v, ok := field.Value.(int); ok {
-				logCtx = logCtx.Int(field.Key, v)
-			}
-		case Int64Type:
-			if v, ok := field.Value.(int64); ok {
-				logCtx = logCtx.Int64(field.Key, v)
-			}
-		case BoolType:
-			if v, ok := field.Value.(bool); ok {
-				logCtx = logCtx.Bool(field.Key, v)
-			}
-		default:
-			logCtx = logCtx.Interface(field.Key, field.Value)
-		}
+func (z *zeroLogger) withField(c zerolog.Context, f F) zerolog.Context {
+	switch v := f.V.(type) {
+	case string:
+		return c.Str(f.K, v)
+	case int:
+		return c.Int(f.K, v)
+	case int64:
+		return c.Int64(f.K, v)
+	case bool:
+		return c.Bool(f.K, v)
+	case error:
+		return c.AnErr(f.K, v)
+	default:
+		return c.Interface(f.K, v)
 	}
-
-	newLogger := logCtx.Logger()
-	return newLogger.WithContext(ctx)
-}
-
-func (l *ZeroLogger) WithCaller(skip int) Logger {
-	log := l.logger.With().CallerWithSkipFrameCount(skip).Logger()
-	return &ZeroLogger{logger: log}
 }

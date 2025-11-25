@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go-tpl/infra/logger"
-	"runtime"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,7 +13,6 @@ import (
 
 // GormLogger 自定义GORM日志记录器
 type GormLogger struct {
-	logger        logger.Logger
 	logLevel      glog.LogLevel
 	slowThreshold time.Duration
 }
@@ -23,7 +20,6 @@ type GormLogger struct {
 // NewGormLogger 创建新的GORM日志记录器
 func NewGormLogger() glog.Interface {
 	return &GormLogger{
-		logger:   logger.GetLogger().WithCaller(3),
 		logLevel: glog.Info,
 	}
 }
@@ -66,18 +62,24 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	sql, rows := fc()
 
 	// add field
-	fields := []logger.Field{
-		{Key: "duration_ms", Value: elapsed.Milliseconds()},
-		{Key: "sql", Value: sql},
-		{Key: "rows", Value: rows},
+	fields := []logger.F{
+		logger.Str("sql", sql),
+		logger.Int64("rows", rows),
+		logger.Int64("duration", elapsed.Milliseconds()),
 	}
-
-	msg := "sql do success"
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		msg = err.Error()
+	
+	switch {
+	// 错误情况
+	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
+		fields = append(fields, logger.Err(err))
+		l.logger(ctx).Logd(2, logger.ERROR, "query error", fields...)
+	// 慢查询
+	case l.slowThreshold > 0 && elapsed > l.slowThreshold:
+		l.logger(ctx).Logd(2, logger.WARN, "slow query", fields...)
+	// 正常查询
+	case l.logLevel >= glog.Info:
+		l.logger(ctx).Logd(2, logger.INFO, "query success", fields...)
 	}
-
-	l.logger.Log(ctx, logger.InfoLevel, msg, fields...)
 }
 
 // log 通用日志记录方法
@@ -88,31 +90,20 @@ func (l *GormLogger) log(ctx context.Context, level glog.LogLevel, msg string, d
 
 	switch level {
 	case glog.Info:
-		l.logger.Log(ctx, logger.InfoLevel, msg)
+		l.logger(ctx).Logd(2, logger.INFO, msg)
 	case glog.Warn:
-		l.logger.Log(ctx, logger.WarnLevel, msg)
+		l.logger(ctx).Logd(2, logger.WARN, msg)
 	case glog.Error:
-		l.logger.Log(ctx, logger.ErrorLevel, msg)
+		l.logger(ctx).Logd(2, logger.ERROR, msg)
 	default:
-		l.logger.Log(ctx, logger.InfoLevel, msg)
+		l.logger(ctx).Logd(2, logger.INFO, msg)
 	}
 }
 
-// getCaller 获取调用者信息
-func (l *GormLogger) getCaller() (string, int) {
-	// 获取调用栈
-	_, file, line, ok := runtime.Caller(4)
-	if !ok {
-		return "", 0
+// logger 获取 logger，优先从 context 获取
+func (l *GormLogger) logger(ctx context.Context) logger.Logger {
+	if cl := logger.Ctx(ctx); cl != nil {
+		return cl
 	}
-
-	// 提取文件名（去掉路径）
-	if idx := strings.LastIndex(file, "/"); idx >= 0 {
-		file = file[idx+1:]
-	}
-	if idx := strings.LastIndex(file, "\\"); idx >= 0 {
-		file = file[idx+1:]
-	}
-
-	return file, line
+	return logger.Default()
 }

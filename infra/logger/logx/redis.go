@@ -13,32 +13,28 @@ import (
 )
 
 // RedisLogger 自定义Redis客户端日志记录器
-type RedisLogger struct {
-	logger logger.Logger
-}
+type RedisLogger struct{}
 
 // NewRedisLogger 创建新的Redis日志记录器
 func NewRedisLogger() *RedisLogger {
-	return &RedisLogger{
-		logger: logger.GetLogger().WithCaller(1),
-	}
+	return &RedisLogger{}
 }
 
 func (l *RedisLogger) DialHook(next redis.DialHook) redis.DialHook {
 	return func(ctx context.Context, network, addr string) (net.Conn, error) {
 		start := time.Now()
 		conn, err := next(ctx, network, addr)
+		elapsed := time.Since(start)
 
-		fields := []logger.Field{
-			{Key: "event", Value: "redis_dial"},
-			{Key: "address", Value: addr},
-			{Key: "duration_ms", Value: time.Since(start).Milliseconds()},
+		fields := []logger.F{
+			logger.Str("addr", addr),
+			logger.Str("duration", fmtDuration(elapsed)),
 		}
 
 		if err != nil {
-			l.logger.Log(ctx, logger.ErrorLevel, fmt.Sprintf("redis connected failed: %v", err), fields...)
+			l.logger(ctx).Logd(3, logger.ERROR, fmt.Sprintf("redis connected failed: %v", err), fields...)
 		} else {
-			l.logger.Log(ctx, logger.InfoLevel, "redis connected", fields...)
+			l.logger(ctx).Logd(3, logger.INFO, "redis connected", fields...)
 		}
 
 		return conn, err
@@ -52,33 +48,20 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		err := next(ctx, cmd)
 		elapsed := time.Since(start)
 
-		// 构建命令字符串
-		cmdStr := l.buildCommandString(cmd)
-
 		// 添加字段
-		fields := []logger.Field{
-			{Key: "event", Value: "redis_command"},
-			{Key: "command", Value: cmdStr},
-			{Key: "duration_ms", Value: elapsed.Milliseconds()},
+		fields := []logger.F{
+			logger.Str("cmd", l.buildCmd(cmd)),
+			logger.Str("duration", fmtDuration(elapsed)),
 		}
 
-		// 根据是否有错误确定日志级别和消息
-		msg := "redis command success"
-		level := logger.InfoLevel
-
-		if err != nil && !errors.Is(err, redis.Nil) {
-			msg = fmt.Sprintf("redis command failed: %v", err)
-			level = logger.ErrorLevel
+		switch {
+		case err != nil && !errors.Is(err, redis.Nil):
+			l.logger(ctx).Logd(3, logger.ERROR, "redis error", append(fields, logger.Err(err))...)
+		case elapsed > 100*time.Millisecond:
+			l.logger(ctx).Logd(3, logger.WARN, "redis slow", fields...)
+		default:
+			l.logger(ctx).Logd(3, logger.INFO, "redis success", fields...)
 		}
-
-		// 对于慢查询，使用警告级别
-		if elapsed > 100*time.Millisecond && err == nil {
-			msg = fmt.Sprintf("redis slow query detected (%v)", elapsed)
-			level = logger.WarnLevel
-		}
-
-		l.logger.Log(ctx, level, msg, fields...)
-
 		return err
 	}
 }
@@ -91,16 +74,18 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 		elapsed := time.Since(start)
 
 		// 记录管道执行的整体信息
-		fields := []logger.Field{
-			{Key: "event", Value: "redis_pipeline"},
-			{Key: "command_count", Value: len(cmds)},
-			{Key: "duration_ms", Value: elapsed.Milliseconds()},
+		fields := []logger.F{
+			logger.Str("cmd", l.buildPipelineCmd(cmds)),
+			logger.Str("duration", fmtDuration(elapsed)),
 		}
 
-		if err != nil {
-			l.logger.Log(ctx, logger.ErrorLevel, fmt.Sprintf("redis pipeline failed: %v", err), fields...)
-		} else {
-			l.logger.Log(ctx, logger.InfoLevel, "redis pipeline executed", fields...)
+		switch {
+		case err != nil && !errors.Is(err, redis.Nil):
+			l.logger(ctx).Logd(3, logger.ERROR, "redis pipeline error", append(fields, logger.Err(err))...)
+		case elapsed > 100*time.Millisecond:
+			l.logger(ctx).Logd(3, logger.WARN, "redis pipeline slow", fields...)
+		default:
+			l.logger(ctx).Logd(3, logger.INFO, "redis pipeline success", fields...)
 		}
 
 		return err
@@ -108,7 +93,7 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 }
 
 // buildCommandString 构建命令字符串（隐藏敏感信息）
-func (l *RedisLogger) buildCommandString(cmd redis.Cmder) string {
+func (l *RedisLogger) buildCmd(cmd redis.Cmder) string {
 	args := cmd.Args()
 	if len(args) == 0 {
 		return cmd.Name()
@@ -132,6 +117,29 @@ func (l *RedisLogger) buildCommandString(cmd redis.Cmder) string {
 	return strings.Join(argStrs, " ")
 }
 
+func (l *RedisLogger) buildPipelineCmd(cmds []redis.Cmder) string {
+	if len(cmds) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	for i, cmd := range cmds {
+		if i > 0 {
+			sb.WriteString("; ")
+		}
+		if i >= 5 {
+			sb.WriteString(fmt.Sprintf("... (%d more)", len(cmds)-5))
+			break
+		}
+		sb.WriteString(l.buildCmd(cmd))
+	}
+	return sb.String()
+}
+
+func fmtDuration(d time.Duration) string {
+	return fmt.Sprintf("%.3fms", float64(d.Nanoseconds())/1e6)
+}
+
 // isSensitiveCommand 判断是否为敏感命令
 func (l *RedisLogger) isSensitiveCommand(cmdName string) bool {
 	sensitiveCommands := map[string]bool{
@@ -151,4 +159,11 @@ func (l *RedisLogger) isSensitiveCommand(cmdName string) bool {
 		"RESTORE": true,
 	}
 	return sensitiveCommands[cmdName]
+}
+
+func (l *RedisLogger) logger(ctx context.Context) logger.Logger {
+	if cl := logger.Ctx(ctx); cl != nil {
+		return cl
+	}
+	return logger.Default()
 }
