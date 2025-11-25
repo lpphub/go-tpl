@@ -26,7 +26,7 @@ func (l *RedisLogger) DialHook(next redis.DialHook) redis.DialHook {
 		conn, err := next(ctx, network, addr)
 		elapsed := time.Since(start)
 
-		fields := []logger.F{
+		fields := []logger.Field{
 			logger.Str("addr", addr),
 			logger.Str("duration", fmtDuration(elapsed)),
 		}
@@ -49,7 +49,7 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		elapsed := time.Since(start)
 
 		// 添加字段
-		fields := []logger.F{
+		fields := []logger.Field{
 			logger.Str("cmd", l.buildCmd(cmd)),
 			logger.Str("duration", fmtDuration(elapsed)),
 		}
@@ -74,7 +74,7 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 		elapsed := time.Since(start)
 
 		// 记录管道执行的整体信息
-		fields := []logger.F{
+		fields := []logger.Field{
 			logger.Str("cmd", l.buildPipelineCmd(cmds)),
 			logger.Str("duration", fmtDuration(elapsed)),
 		}

@@ -23,11 +23,11 @@ func newZeroLogger(cfg *config) Logger {
 	return &zeroLogger{l: l}
 }
 
-func (z *zeroLogger) Log(level Level, msg string, fields ...F) {
+func (z *zeroLogger) Log(level Level, msg string, fields ...Field) {
 	z.Logd(1, level, msg, fields...)
 }
 
-func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...F) {
+func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...Field) {
 	e := z.event(level)
 
 	// skip frame
@@ -39,7 +39,7 @@ func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...F) {
 	e.Msg(msg)
 }
 
-func (z *zeroLogger) With(fields ...F) Logger {
+func (z *zeroLogger) With(fields ...Field) Logger {
 	ctx := z.l.With()
 	for _, f := range fields {
 		ctx = z.withField(ctx, f)
@@ -66,7 +66,7 @@ func (z *zeroLogger) event(level Level) *zerolog.Event {
 	}
 }
 
-func (z *zeroLogger) addField(e *zerolog.Event, f F) *zerolog.Event {
+func (z *zeroLogger) addField(e *zerolog.Event, f Field) *zerolog.Event {
 	switch v := f.V.(type) {
 	case string:
 		return e.Str(f.K, v)
@@ -83,7 +83,7 @@ func (z *zeroLogger) addField(e *zerolog.Event, f F) *zerolog.Event {
 	}
 }
 
-func (z *zeroLogger) withField(c zerolog.Context, f F) zerolog.Context {
+func (z *zeroLogger) withField(c zerolog.Context, f Field) zerolog.Context {
 	switch v := f.V.(type) {
 	case string:
 		return c.Str(f.K, v)

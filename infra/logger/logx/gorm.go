@@ -62,12 +62,12 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	sql, rows := fc()
 
 	// add field
-	fields := []logger.F{
+	fields := []logger.Field{
 		logger.Str("sql", sql),
 		logger.Int64("rows", rows),
 		logger.Int64("duration", elapsed.Milliseconds()),
 	}
-	
+
 	switch {
 	// 错误情况
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):

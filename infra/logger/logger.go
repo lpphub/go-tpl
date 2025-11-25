@@ -17,8 +17,8 @@ const (
 	FATAL
 )
 
-// F 日志字段
-type F struct {
+// Field 日志字段
+type Field struct {
 	K string
 	V any
 }
@@ -26,11 +26,11 @@ type F struct {
 // Logger 日志接口 - 只有两个核心方法
 type Logger interface {
 	// Log 输出日志
-	Log(level Level, msg string, fields ...F)
-	Logd(depth int, level Level, msg string, fields ...F)
+	Log(level Level, msg string, fields ...Field)
+	Logd(depth int, level Level, msg string, fields ...Field)
 
 	// With 创建新的Logger
-	With(fields ...F) Logger
+	With(fields ...Field) Logger
 	// WithCallerSkip 创建新的Logger, 设置调用栈跳过层数
 	WithCallerSkip(skip int) Logger
 }
@@ -55,7 +55,7 @@ func ToCtx(ctx context.Context, l Logger) context.Context {
 	return context.WithValue(ctx, ctxKey{}, l)
 }
 
-func WithCtx(ctx context.Context, fields ...F) context.Context {
+func WithCtx(ctx context.Context, fields ...Field) context.Context {
 	return ToCtx(ctx, Ctx(ctx).With(fields...))
 }
 
@@ -78,9 +78,9 @@ func defaultConfig(opts ...Option) *config {
 func WithLevel(l Level) Option      { return func(c *config) { c.level = l } }
 func WithOutput(w io.Writer) Option { return func(c *config) { c.output = w } }
 
-func Str(k, v string) F         { return F{k, v} }
-func Int(k string, v int) F     { return F{k, v} }
-func Int64(k string, v int64) F { return F{k, v} }
-func Bool(k string, v bool) F   { return F{k, v} }
-func Err(e error) F             { return F{"error", e} }
-func Any(k string, v any) F     { return F{k, v} }
+func Str(k, v string) Field         { return Field{k, v} }
+func Int(k string, v int) Field     { return Field{k, v} }
+func Int64(k string, v int64) Field { return Field{k, v} }
+func Bool(k string, v bool) Field   { return Field{k, v} }
+func Err(e error) Field             { return Field{"error", e} }
+func Any(k string, v any) Field     { return Field{k, v} }
