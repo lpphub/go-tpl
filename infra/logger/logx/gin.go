@@ -15,7 +15,7 @@ const (
 )
 
 func init() {
-	logger.RegisterCtxAdapter(func(ctx context.Context) context.Context {
+	logger.RegisterCtxExtractor(func(ctx context.Context) context.Context {
 		if gCtx, ok := ctx.(*gin.Context); ok {
 			return gCtx.Request.Context()
 		}
