@@ -15,7 +15,7 @@ const (
 
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx := logger.WithCtx(c.Request.Context(), logger.Str("logId", getLogIDFromGin(c)))
+		ctx := logger.CtxWithField(c.Request.Context(), logger.Str("logId", getLogIDFromGin(c)))
 		c.Request = c.Request.WithContext(ctx)
 
 		logger.Info(ctx, "gin request",

@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Level 日志级别
@@ -23,7 +25,16 @@ type Field struct {
 	Value any
 }
 
-// Logger 日志接口 - 只有两个核心方法
+func Str(k, v string) Field             { return Field{k, v} }
+func Int(k string, v int) Field         { return Field{k, v} }
+func Int64(k string, v int64) Field     { return Field{k, v} }
+func Float64(k string, v float64) Field { return Field{k, v} }
+func Bool(k string, v bool) Field       { return Field{k, v} }
+func Err(e error) Field                 { return Field{"error", e} }
+func Any(k string, v any) Field         { return Field{k, v} }
+
+// ==================== Logger ====================
+
 type Logger interface {
 	// Log 输出日志
 	Log(level Level, msg string, fields ...Field)
@@ -51,15 +62,15 @@ func Ctx(ctx context.Context) Logger {
 	return Default()
 }
 
-func ToCtx(ctx context.Context, l Logger) context.Context {
+func CtxWithLogger(ctx context.Context, l Logger) context.Context {
 	return context.WithValue(ctx, ctxKey{}, l)
 }
 
-func WithCtx(ctx context.Context, fields ...Field) context.Context {
-	return ToCtx(ctx, Ctx(ctx).With(fields...))
+func CtxWithField(ctx context.Context, fields ...Field) context.Context {
+	return CtxWithLogger(ctx, Ctx(ctx).With(fields...))
 }
 
-// ==================== 配置 ====================
+// ==================== config ====================
 
 type config struct {
 	level  Level
@@ -77,11 +88,16 @@ func applyConfig(opts ...Option) *config {
 
 func WithLevel(l Level) Option      { return func(c *config) { c.level = l } }
 func WithOutput(w io.Writer) Option { return func(c *config) { c.output = w } }
+func WithLogFile(filepath string) Option {
+	return func(c *config) {
+		lj := &lumberjack.Logger{
+			Filename:   filepath, // 路径
+			MaxSize:    100,      // 单个文件最大 MB
+			MaxBackups: 5,        // 最多保留几个旧文件
+			MaxAge:     14,       // 旧文件最长保存天数
+			Compress:   true,     // 是否 gzip 压缩旧文件
+		}
 
-func Str(k, v string) Field             { return Field{k, v} }
-func Int(k string, v int) Field         { return Field{k, v} }
-func Int64(k string, v int64) Field     { return Field{k, v} }
-func Float64(k string, v float64) Field { return Field{k, v} }
-func Bool(k string, v bool) Field       { return Field{k, v} }
-func Err(e error) Field                 { return Field{"error", e} }
-func Any(k string, v any) Field         { return Field{k, v} }
+		c.output = lj
+	}
+}
