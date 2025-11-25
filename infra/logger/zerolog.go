@@ -24,14 +24,14 @@ func newZeroLogger(cfg *config) Logger {
 }
 
 func (z *zeroLogger) Log(level Level, msg string, fields ...Field) {
-	z.Logd(1, level, msg, fields...)
+	z.Logc(1, level, msg, fields...)
 }
 
-func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...Field) {
+func (z *zeroLogger) Logc(callerSkip int, level Level, msg string, fields ...Field) {
 	e := z.event(level)
 
 	// skip frame
-	e = e.CallerSkipFrame(depth + 2)
+	e = e.CallerSkipFrame(callerSkip + 2)
 
 	for _, f := range fields {
 		e = z.addField(e, f)
@@ -47,7 +47,7 @@ func (z *zeroLogger) With(fields ...Field) Logger {
 	return &zeroLogger{core: ctx.Logger()}
 }
 
-func (z *zeroLogger) WithCallerSkip(skip int) Logger {
+func (z *zeroLogger) WithCaller(skip int) Logger {
 	return &zeroLogger{core: z.core.With().CallerWithSkipFrameCount(skip).Logger()}
 }
 
@@ -67,35 +67,39 @@ func (z *zeroLogger) event(level Level) *zerolog.Event {
 }
 
 func (z *zeroLogger) addField(e *zerolog.Event, f Field) *zerolog.Event {
-	switch v := f.V.(type) {
+	switch v := f.Value.(type) {
 	case string:
-		return e.Str(f.K, v)
+		return e.Str(f.Key, v)
 	case int:
-		return e.Int(f.K, v)
+		return e.Int(f.Key, v)
 	case int64:
-		return e.Int64(f.K, v)
+		return e.Int64(f.Key, v)
+	case float64:
+		return e.Float64(f.Key, v)
 	case bool:
-		return e.Bool(f.K, v)
+		return e.Bool(f.Key, v)
 	case error:
-		return e.AnErr(f.K, v)
+		return e.AnErr(f.Key, v)
 	default:
-		return e.Interface(f.K, v)
+		return e.Interface(f.Key, v)
 	}
 }
 
 func (z *zeroLogger) withField(c zerolog.Context, f Field) zerolog.Context {
-	switch v := f.V.(type) {
+	switch v := f.Value.(type) {
 	case string:
-		return c.Str(f.K, v)
+		return c.Str(f.Key, v)
 	case int:
-		return c.Int(f.K, v)
+		return c.Int(f.Key, v)
 	case int64:
-		return c.Int64(f.K, v)
+		return c.Int64(f.Key, v)
+	case float64:
+		return c.Float64(f.Key, v)
 	case bool:
-		return c.Bool(f.K, v)
+		return c.Bool(f.Key, v)
 	case error:
-		return c.AnErr(f.K, v)
+		return c.AnErr(f.Key, v)
 	default:
-		return c.Interface(f.K, v)
+		return c.Interface(f.Key, v)
 	}
 }

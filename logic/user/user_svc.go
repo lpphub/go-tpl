@@ -32,8 +32,8 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 		list  []User
 	)
 
-	get := s.redis.Get(ctx, "get list")
-	logger.Info(ctx, "get list test:"+get.String())
+	get := s.redis.Get(ctx, "user_list")
+	logger.Info(ctx, "get rdb: "+get.String())
 
 	_db := s.db.WithContext(ctx).Model(&User{})
 	if req.Username != "" {

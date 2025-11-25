@@ -32,9 +32,9 @@ func (l *RedisLogger) DialHook(next redis.DialHook) redis.DialHook {
 		}
 
 		if err != nil {
-			l.logger(ctx).Logd(3, logger.ERROR, fmt.Sprintf("redis connected failed: %v", err), fields...)
+			l.logger(ctx).Logc(3, logger.ERROR, fmt.Sprintf("redis connected failed: %v", err), fields...)
 		} else {
-			l.logger(ctx).Logd(3, logger.INFO, "redis connected", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis connected", fields...)
 		}
 
 		return conn, err
@@ -56,11 +56,11 @@ func (l *RedisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 
 		switch {
 		case err != nil && !errors.Is(err, redis.Nil):
-			l.logger(ctx).Logd(3, logger.ERROR, "redis error", append(fields, logger.Err(err))...)
+			l.logger(ctx).Logc(3, logger.ERROR, "redis error", append(fields, logger.Err(err))...)
 		case elapsed > 100*time.Millisecond:
-			l.logger(ctx).Logd(3, logger.WARN, "redis slow", fields...)
+			l.logger(ctx).Logc(3, logger.WARN, "redis slow", fields...)
 		default:
-			l.logger(ctx).Logd(3, logger.INFO, "redis success", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis success", fields...)
 		}
 		return err
 	}
@@ -81,11 +81,11 @@ func (l *RedisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 
 		switch {
 		case err != nil && !errors.Is(err, redis.Nil):
-			l.logger(ctx).Logd(3, logger.ERROR, "redis pipeline error", append(fields, logger.Err(err))...)
+			l.logger(ctx).Logc(3, logger.ERROR, "redis pipeline error", append(fields, logger.Err(err))...)
 		case elapsed > 100*time.Millisecond:
-			l.logger(ctx).Logd(3, logger.WARN, "redis pipeline slow", fields...)
+			l.logger(ctx).Logc(3, logger.WARN, "redis pipeline slow", fields...)
 		default:
-			l.logger(ctx).Logd(3, logger.INFO, "redis pipeline success", fields...)
+			l.logger(ctx).Logc(3, logger.INFO, "redis pipeline success", fields...)
 		}
 
 		return err

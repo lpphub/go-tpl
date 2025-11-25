@@ -72,13 +72,13 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	// 错误情况
 	case err != nil && !errors.Is(err, gorm.ErrRecordNotFound):
 		fields = append(fields, logger.Err(err))
-		l.logger(ctx).Logd(2, logger.ERROR, "query error", fields...)
+		l.logger(ctx).Logc(2, logger.ERROR, "query error", fields...)
 	// 慢查询
 	case l.slowThreshold > 0 && elapsed > l.slowThreshold:
-		l.logger(ctx).Logd(2, logger.WARN, "slow query", fields...)
+		l.logger(ctx).Logc(2, logger.WARN, "slow query", fields...)
 	// 正常查询
 	case l.logLevel >= glog.Info:
-		l.logger(ctx).Logd(2, logger.INFO, "query success", fields...)
+		l.logger(ctx).Logc(2, logger.INFO, "query success", fields...)
 	}
 }
 
@@ -90,13 +90,13 @@ func (l *GormLogger) log(ctx context.Context, level glog.LogLevel, msg string, d
 
 	switch level {
 	case glog.Info:
-		l.logger(ctx).Logd(2, logger.INFO, msg)
+		l.logger(ctx).Logc(2, logger.INFO, msg)
 	case glog.Warn:
-		l.logger(ctx).Logd(2, logger.WARN, msg)
+		l.logger(ctx).Logc(2, logger.WARN, msg)
 	case glog.Error:
-		l.logger(ctx).Logd(2, logger.ERROR, msg)
+		l.logger(ctx).Logc(2, logger.ERROR, msg)
 	default:
-		l.logger(ctx).Logd(2, logger.INFO, msg)
+		l.logger(ctx).Logc(2, logger.INFO, msg)
 	}
 }
 
