@@ -1,7 +1,7 @@
 package web
 
 import (
-	"go-tpl/infra/logging/logx"
+	"go-tpl/infra/logger/logx"
 	"go-tpl/web/rest"
 	"go-tpl/web/rest/permission"
 	"go-tpl/web/rest/role"

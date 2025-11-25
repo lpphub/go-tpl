@@ -3,7 +3,7 @@ package rest
 import (
 	"errors"
 	"go-tpl/infra/jwt"
-	"go-tpl/infra/logging"
+	"go-tpl/infra/logger"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
 	"go-tpl/web/base"
@@ -13,13 +13,13 @@ import (
 )
 
 func Test(c *gin.Context) {
-	logging.Info(c, "test1")
+	logger.Info(c, "test1")
 
-	logging.Info(c.Request.Context(), "test2")
+	logger.Info(c.Request.Context(), "test2")
 
-	logging.Info(c, "test3")
+	logger.Info(c.Request.Context(), "test3")
 
-	logging.Errorw(c, errors.New("test"))
+	logger.Errw(c, errors.New("test"))
 
 	base.OKWithData(c, "ok")
 }
@@ -45,7 +45,7 @@ func Register(c *gin.Context) {
 	// 生成 token
 	token, err := jwt.GenerateToken(user.ID)
 	if err != nil {
-		logging.Errorw(c, err)
+		logger.Errw(c, err)
 		base.Fail(c, 500, "生成token失败")
 		return
 	}
@@ -73,7 +73,7 @@ func Login(c *gin.Context) {
 	// 生成 token
 	token, err := jwt.GenerateToken(user.ID)
 	if err != nil {
-		logging.Errorw(c, err)
+		logger.Errw(c, err)
 		base.Fail(c, 500, "生成token失败")
 		return
 	}
