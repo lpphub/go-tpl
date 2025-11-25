@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/config"
-	"go-tpl/infra/logging/logx"
+	"go-tpl/infra/logger/logx"
 	"time"
 
 	"github.com/redis/go-redis/v9"

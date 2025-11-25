@@ -1,9 +1,8 @@
 package logx
 
 import (
-	"context"
 	"fmt"
-	"go-tpl/infra/logging"
+	"go-tpl/infra/logger"
 	"strconv"
 	"time"
 
@@ -11,26 +10,16 @@ import (
 )
 
 const (
-	LogIDHeader = "X-Trace-LogID"
+	LogIDHeader = "X-Trace-logId"
 )
-
-func init() {
-	logging.RegisterCtxAdapter(func(ctx context.Context) context.Context {
-		if gCtx, ok := ctx.(*gin.Context); ok {
-			return gCtx.Request.Context()
-		}
-		return ctx
-	})
-}
 
 func GinLogMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		logCtx := logging.WithContext(c.Request.Context(), logging.WithField("log_id", getLogIDFromGin(c)))
+		ctx := logger.WithCtx(c.Request.Context(), logger.Str("logId", getLogIDFromGin(c)))
+		c.Request = c.Request.WithContext(ctx)
 
-		logging.Info(logCtx, "gin request",
-			logging.WithField("path", fmt.Sprintf("[%s %s]", c.Request.Method, c.Request.RequestURI)))
-
-		c.Request = c.Request.WithContext(logCtx)
+		logger.Info(ctx, "gin request",
+			logger.Str("path", fmt.Sprintf("[%s %s]", c.Request.Method, c.Request.RequestURI)))
 
 		c.Next()
 	}
