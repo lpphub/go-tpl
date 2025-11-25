@@ -20,8 +20,8 @@ func newZapLogger(cfg *config) Logger {
 		EncodeCaller: zapcore.ShortCallerEncoder,
 	}
 
-	var enc = zapcore.NewConsoleEncoder(encCfg)
-	//enc = zapcore.NewJSONEncoder(encCfg)
+	//var enc = zapcore.NewConsoleEncoder(encCfg)
+	var enc = zapcore.NewJSONEncoder(encCfg)
 
 	core := zapcore.NewCore(
 		enc,
@@ -57,7 +57,7 @@ func (z *zapLogger) WithCallerSkip(skip int) Logger {
 }
 
 func (z *zapLogger) getZapField(fields []Field) []zap.Field {
-	zapFields := make([]zap.Field, 0, len(fields))
+	zapFields := make([]zap.Field, len(fields), len(fields))
 	for i, field := range fields {
 		zapFields[i] = zap.Any(field.K, field.V)
 	}
