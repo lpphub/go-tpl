@@ -23,6 +23,6 @@ func TestCtxInfo(t *testing.T) {
 		Error(ctx, "test")
 
 		callerLog.Log(INFO, "test", Str("requestId", "23123"))
-		callerLog.Logd(1, WARN, "test", Str("requestId", "23123"))
+		callerLog.Logd(0, WARN, "test", Str("requestId", "23123"))
 	})
 }

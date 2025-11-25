@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type zeroLogger struct{ l zerolog.Logger }
+type zeroLogger struct{ core zerolog.Logger }
 
 func newZeroLogger(cfg *config) Logger {
 	// default config
@@ -20,7 +20,7 @@ func newZeroLogger(cfg *config) Logger {
 	output := os.Stdout
 
 	l := zerolog.New(output).With().Timestamp().Logger().Level(zerolog.Level(cfg.level))
-	return &zeroLogger{l: l}
+	return &zeroLogger{core: l}
 }
 
 func (z *zeroLogger) Log(level Level, msg string, fields ...Field) {
@@ -31,7 +31,7 @@ func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...Field) {
 	e := z.event(level)
 
 	// skip frame
-	e = e.CallerSkipFrame(depth + 1)
+	e = e.CallerSkipFrame(depth + 2)
 
 	for _, f := range fields {
 		e = z.addField(e, f)
@@ -40,29 +40,29 @@ func (z *zeroLogger) Logd(depth int, level Level, msg string, fields ...Field) {
 }
 
 func (z *zeroLogger) With(fields ...Field) Logger {
-	ctx := z.l.With()
+	ctx := z.core.With()
 	for _, f := range fields {
 		ctx = z.withField(ctx, f)
 	}
-	return &zeroLogger{l: ctx.Logger()}
+	return &zeroLogger{core: ctx.Logger()}
 }
 
 func (z *zeroLogger) WithCallerSkip(skip int) Logger {
-	return &zeroLogger{l: z.l.With().CallerWithSkipFrameCount(skip).Logger()}
+	return &zeroLogger{core: z.core.With().CallerWithSkipFrameCount(skip).Logger()}
 }
 
 func (z *zeroLogger) event(level Level) *zerolog.Event {
 	switch level {
 	case DEBUG:
-		return z.l.Debug()
+		return z.core.Debug()
 	case WARN:
-		return z.l.Warn()
+		return z.core.Warn()
 	case ERROR:
-		return z.l.Error()
+		return z.core.Error()
 	case FATAL:
-		return z.l.Fatal()
+		return z.core.Fatal()
 	default:
-		return z.l.Info()
+		return z.core.Info()
 	}
 }
 
