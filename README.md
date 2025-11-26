@@ -19,7 +19,7 @@
 - **数据库**: GORM with MySQL 驱动，完整的事务支持
 - **缓存**: RDB 集成，支持缓存和会话管理
 - **身份认证**: 基于 JWT 的身份认证，bcrypt 密码加密
-- **日志记录**: 基于 Zap 的高性能结构化日志和请求上下文
+- **日志记录**: 基于 Zerolog 的高性能结构化日志和请求上下文
 - **监控**: Prometheus 指标收集和 pprof 性能分析
 - **配置管理**: 基于 YAML 的配置系统，支持环境变量覆盖
 - **Docker**: 生产就绪的 Docker 配置和部署
@@ -43,7 +43,7 @@ go-tpl/
 │   │   ├── transaction.go # 事务管理
 │   │   └── transaction_test.go
 │   ├── jwt/               # JWT 令牌生成和验证
-│   ├── logging/           # 日志基础设施
+│   ├── logger/            # 日志基础设施
 │   │   └── logx/          # 自定义日志工具和中间件
 │   └── monitor/           # 监控和性能分析
 │       └── monitor.go     # Prometheus 指标设置
@@ -84,7 +84,7 @@ go-tpl/
 - **配置管理**: `infra/config/config.go` - 基于 YAML 的配置，支持环境变量覆盖
 - **数据库层**: GORM with MySQL 驱动，通过 `infra.DB` 访问，支持事务
 - **缓存层**: RDB 客户端，通过 `infra.RDB` 访问
-- **日志系统**: 基于 Zap 的高性能结构化日志和自定义 logx 工具
+- **日志系统**: 基于 Zerolog 的高性能结构化日志和自定义 logx 工具
 - **依赖注入**: Wire 编译时依赖注入，清晰的依赖流向
 - **监控系统**: Prometheus 指标收集和 pprof 性能分析
 - **身份认证**: JWT-based 认证，bcrypt 密码加密
@@ -118,7 +118,7 @@ go-tpl/
 #### 核心框架
 - **Go 1.25** - 编程语言
 - **Gin v1.11.0** - HTTP Web 框架
-- **GORM v1.31.0** - ORM 库
+- **GORM v1.31.1** - ORM 库
 
 #### 数据存储
 - **MySQL** - 主数据库
@@ -134,7 +134,7 @@ go-tpl/
 - **goccy/go-yaml v1.18.0** - YAML 配置解析
 
 #### 日志与监控
-- **Zap v1.27.0** - 高性能结构化日志
+- **Zerolog v1.34.0** - 高性能结构化日志
 - **Prometheus v1.23.2** - 指标收集
 - **fgprof v0.9.5** - 性能分析
 
@@ -757,14 +757,14 @@ wire ./logic/
 
 ### 核心依赖
 - `github.com/gin-gonic/gin v1.11.0` - HTTP Web 框架
-- `gorm.io/gorm v1.31.0` - ORM 库
+- `gorm.io/gorm v1.31.1` - ORM 库
 - `gorm.io/driver/mysql v1.6.0` - MySQL 数据库驱动
 - `github.com/redis/go-redis/v9 v9.16.0` - RDB 客户端
-- `go.uber.org/zap v1.27.0` - 高性能结构化日志
+- `github.com/rs/zerolog v1.34.0` - 高性能结构化日志
 
 ### 身份认证与安全
 - `github.com/golang-jwt/jwt/v5 v5.3.0` - JWT 令牌处理
-- `golang.org/x/crypto v0.43.0` - 加密函数 (bcrypt)
+- `golang.org/x/crypto v0.45.0` - 加密函数 (bcrypt)
 
 ### 依赖注入与配置
 - `github.com/google/wire v0.7.0` - 编译时依赖注入

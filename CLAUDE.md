@@ -14,7 +14,7 @@ This is a production-grade Go web application template built with Gin framework 
 - **RDB** - Caching and session management
 - **JWT** - Authentication tokens (golang-jwt/jwt/v5)
 - **Wire** - Compile-time dependency injection
-- **Zap** - High-performance structured logging
+- **Zerolog** - High-performance structured logging
 - **Prometheus** - Metrics collection
 - **goccy/go-yaml** - YAML configuration parsing
 
@@ -32,7 +32,7 @@ infra/                 # Infrastructure layer
 ├── config/            # Configuration management
 ├── dbs/               # Database and RDB setup
 ├── jwt/               # JWT token handling
-├── logging/           # Logging infrastructure
+├── logger/            # Logging infrastructure
 │   └── logx/          # Custom logging utilities
 └── monitor/           # Monitoring and metrics
 
@@ -63,7 +63,7 @@ scripts/               # Utility scripts
 - **Configuration**: `infra/config/config.go` - YAML-based config with environment variable overrides
 - **Database**: GORM with MySQL driver, accessible via `infra.DB` with transaction support
 - **Caching**: RDB client, accessible via `infra.RDB`
-- **Logging**: Zap-based structured logging with custom logx utilities and middleware
+- **Logging**: Zerolog-based structured logging with custom logx utilities and middleware
 - **Dependency Injection**: Wire-based compile-time DI for clean dependencies
 - **Monitoring**: Prometheus metrics and pprof profiling support
 - **Authentication**: JWT-based auth with bcrypt password hashing
@@ -226,14 +226,14 @@ Configuration is loaded from `config/conf.yml` with environment variable overrid
 
 ### Core Dependencies
 - `github.com/gin-gonic/gin v1.11.0` - HTTP web framework
-- `gorm.io/gorm v1.31.0` - ORM library
+- `gorm.io/gorm v1.31.1` - ORM library
 - `gorm.io/driver/mysql v1.6.0` - MySQL database driver
 - `github.com/redis/go-redis/v9 v9.16.0` - RDB client
-- `go.uber.org/zap v1.27.0` - Structured logging
+- `github.com/rs/zerolog v1.34.0` - Structured logging
 
 ### Authentication & Security
 - `github.com/golang-jwt/jwt/v5 v5.3.0` - JWT token handling
-- `golang.org/x/crypto v0.43.0` - Cryptographic functions (bcrypt)
+- `golang.org/x/crypto v0.45.0` - Cryptographic functions (bcrypt)
 
 ### Dependency Injection
 - `github.com/google/wire v0.7.0` - Compile-time dependency injection
