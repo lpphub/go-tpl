@@ -46,7 +46,7 @@ func FailWithError(ctx *gin.Context, err error) {
 		return
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		FailWithError(ctx, shared.ErrRecordNotFound)
+		Fail(ctx, shared.ErrRecordNotFound.Code, shared.ErrRecordNotFound.Error())
 		return
 	}
 	Fail(ctx, shared.ErrServerError.Code, err.Error())

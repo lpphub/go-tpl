@@ -22,7 +22,7 @@ func TransactionFromContext(ctx context.Context) *gorm.DB {
 }
 
 // InTransaction 在事务中执行函数
-func InTransaction(ctx context.Context, db *gorm.DB, fn func(txCtx context.Context) error) error {
+func InTransaction(ctx context.Context, db *gorm.DB, fn func(context.Context) error) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		txCtx := WithTransaction(ctx, tx)
 		return fn(txCtx)
