@@ -4,16 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a production-grade Go web application template built with Gin framework that follows clean architecture principles and domain-driven design. The project features a complete RBAC (Role-Based Access Control) system with user, role, and permission management, following a three-layer architecture: infrastructure (infra), business logic (logic), and web layer (web).
+This is a production-grade Go web application template built with Gin framework that follows clean architecture principles and domain-driven design. The project features a complete RBAC (Role-Based Access Control) system with user, role, and permission management, following a three-layer architecture: infrastructure (infra), business logic (logic), and web layer (web). The application includes JWT-based authentication with access/refresh token pairs, comprehensive monitoring, and Docker deployment support.
 
 ## Tech Stack
 
-- **Go 1.25** - Programming language
+- **Go** - Programming language (1.25+)
 - **Gin** - HTTP web framework for REST APIs
 - **GORM** - ORM with MySQL driver
-- **RDB** - Caching and session management
-- **JWT** - Authentication tokens (golang-jwt/jwt/v5)
+- **Redis** - Caching and session management
+- **JWT** - Authentication tokens with access/refresh token pairs
 - **Wire** - Compile-time dependency injection
+- **Viper** - Configuration management with environment variable support
 - **Zerolog** - High-performance structured logging
 - **Prometheus** - Metrics collection
 - **goccy/go-yaml** - YAML configuration parsing
@@ -37,6 +38,7 @@ infra/                 # Infrastructure layer
 └── monitor/           # Monitoring and metrics
 
 logic/                 # Business logic layer
+├── auth/              # Authentication service (register, login, refresh)
 ├── user/              # User domain (model, service)
 ├── role/              # Role domain
 ├── permission/        # Permission domain
@@ -46,6 +48,7 @@ logic/                 # Business logic layer
 └── wire_gen.go        # Generated wire code
 
 web/                   # Web layer
+├── app.go             # Application setup with graceful shutdown
 ├── base/              # Base utilities (response rendering)
 ├── middleware/        # HTTP middleware
 ├── rest/              # REST API handlers
@@ -56,17 +59,20 @@ web/                   # Web layer
 └── router.go          # Route configuration
 
 scripts/               # Utility scripts
+├── docker-compose.yaml    # Docker Compose configuration
+└── Dockerfile          # Multi-stage Docker build
 ```
 
 ### Key Components
 - **Main Entry**: `cmd/run.go` - Application bootstrap following 4-step initialization
-- **Configuration**: `infra/config/config.go` - YAML-based config with environment variable overrides
+- **Configuration**: `infra/config/config.go` - Viper-based config with YAML and environment variable support
 - **Database**: GORM with MySQL driver, accessible via `infra.DB` with transaction support
-- **Caching**: RDB client, accessible via `infra.RDB`
+- **Caching**: Redis client, accessible via `infra.RDB`
 - **Logging**: Zerolog-based structured logging with custom logx utilities and middleware
 - **Dependency Injection**: Wire-based compile-time DI for clean dependencies
 - **Monitoring**: Prometheus metrics and pprof profiling support
-- **Authentication**: JWT-based auth with bcrypt password hashing
+- **Authentication**: JWT-based auth with access/refresh token pairs and bcrypt password hashing
+- **Application Setup**: `web/app.go` - Application initialization with graceful shutdown
 
 ### Initialization Flow
 1. `infra.Init()` - Load config, setup logging, initialize DB/RDB/JWT
@@ -77,21 +83,29 @@ scripts/               # Utility scripts
 
 ## Domain Models
 
+### Authentication Service
+- User registration with automatic token generation
+- User login with credential validation
+- Token refresh mechanism with refresh token rotation
+- Token pair generation (access + refresh tokens)
+
 ### User Management
 - Complete CRUD operations with status management (active/inactive)
 - Password encryption using bcrypt
 - Role assignment and RBAC integration
-- JWT-based authentication
+- Login validation and credential checking
 
 ### Role System
 - Hierarchical role management
 - Permission assignment capabilities
 - Status management
+- User-role many-to-many relationships
 
 ### Permission System
 - Granular permission structure with module organization
 - Resource-action based permissions
 - Integration with role-based access control
+- Dynamic permission checking
 
 ## Development Commands
 
@@ -151,23 +165,45 @@ docker run -p 8080:8080 go-tpl
 
 ## Configuration
 
-Configuration is loaded from `config/conf.yml` with environment variable overrides:
+Configuration is managed by Viper and loaded from `config/conf.yml` with environment variable overrides:
 
 ### Database Configuration
-- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-- Default: MySQL on 127.0.0.1:3306
+```yaml
+database:
+  host: 127.0.0.1
+  port: 3306
+  dbname: app_db
+  user: root
+  password: 123456
+```
+Environment variables: `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME`
 
-### RDB Configuration
-- `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`
-- Default: RDB on 127.0.0.1:6379
+### Redis Configuration
+```yaml
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  db: 0
+```
+Environment variables: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`
 
 ### JWT Configuration
-- `JWT_SECRET`, `JWT_EXPIRE_TIME`
-- Default: 24-hour expiration
+```yaml
+jwt:
+  secret: your-secret-key
+  expire_time: 7200        # access_token expiry (seconds)
+  refresh_expire_time: 604800  # refresh_token expiry (seconds)
+```
+Environment variables: `JWT_SECRET`, `JWT_EXPIRE_TIME`, `JWT_REFRESH_EXPIRE_TIME`
 
 ### Server Configuration
-- `SERVER_PORT`, `SERVER_MODE`
-- Default: Port 8080, debug mode
+```yaml
+server:
+  port: 8080
+  mode: debug  # debug, release, test
+```
+Environment variables: `SERVER_PORT`, `SERVER_MODE`
 
 ## Key Patterns
 
@@ -225,27 +261,62 @@ Configuration is loaded from `config/conf.yml` with environment variable overrid
 ## Dependencies
 
 ### Core Dependencies
-- `github.com/gin-gonic/gin v1.11.0` - HTTP web framework
-- `gorm.io/gorm v1.31.1` - ORM library
-- `gorm.io/driver/mysql v1.6.0` - MySQL database driver
-- `github.com/redis/go-redis/v9 v9.16.0` - RDB client
-- `github.com/rs/zerolog v1.34.0` - Structured logging
+- `github.com/gin-gonic/gin` - HTTP web framework
+- `gorm.io/gorm` - ORM library
+- `gorm.io/driver/mysql` - MySQL database driver
+- `github.com/redis/go-redis/v9` - Redis client
+- `github.com/rs/zerolog` - Structured logging
 
 ### Authentication & Security
-- `github.com/golang-jwt/jwt/v5 v5.3.0` - JWT token handling
-- `golang.org/x/crypto v0.45.0` - Cryptographic functions (bcrypt)
+- `github.com/golang-jwt/jwt/v5` - JWT token handling with access/refresh tokens
+- `golang.org/x/crypto` - Cryptographic functions (bcrypt)
 
-### Dependency Injection
-- `github.com/google/wire v0.7.0` - Compile-time dependency injection
+### Dependency Injection & Configuration
+- `github.com/google/wire` - Compile-time dependency injection
+- `github.com/spf13/viper` - Configuration management with environment variable support
+- `github.com/goccy/go-yaml` - YAML parsing
 
-### Configuration & Utilities
-- `github.com/goccy/go-yaml v1.18.0` - YAML parsing
-- `gopkg.in/natefinch/lumberjack.v2 v2.2.1` - Log rotation
+### Monitoring & Utilities
+- `github.com/prometheus/client_golang` - Metrics collection
+- `gopkg.in/natefinch/lumberjack.v2` - Log rotation
 
-### Monitoring & Testing
-- `github.com/prometheus/client_golang v1.23.2` - Metrics collection
-- `github.com/stretchr/testify v1.11.1` - Testing framework
-- `github.com/DATA-DOG/go-sqlmock v1.5.2` - Database mocking
+### Testing & Development
+- `github.com/stretchr/testify` - Testing framework
+- `github.com/DATA-DOG/go-sqlmock` - Database mocking
+- `github.com/felixge/fgprof` - Continuous profiling
 
-### Performance Profiling
-- `github.com/felixge/fgprof v0.9.5` - Continuous profiling
+## Security Features
+
+### Authentication & Authorization
+- JWT-based authentication with access token (2h default) and refresh token (7d default)
+- bcrypt password hashing with configurable cost factor
+- Role-based access control (RBAC) with fine-grained permissions
+- Middleware for protected routes with token validation
+
+### Data Protection
+- Soft delete patterns for sensitive data
+- Input validation on all API endpoints
+- Environment variable support for sensitive configuration
+- CORS middleware configuration
+- SQL injection prevention through GORM ORM
+
+## Monitoring & Observability
+
+### Metrics Collection
+- Prometheus metrics at `/metrics` endpoint
+- Custom business metrics tracking
+- HTTP request metrics (count, duration, status codes)
+- Application performance monitoring
+
+### Logging
+- Structured logging with Zerolog
+- Request-scoped logging with correlation IDs
+- Log levels: debug, info, warn, error
+- Log rotation with Lumberjack
+- Context preservation across service calls
+
+### Profiling
+- pprof profiling support at `/debug/pprof/`
+- CPU, memory, goroutine, and block profiling
+- Continuous profiling with fgprof
+- Production-safe profiling endpoints

@@ -12,16 +12,17 @@
 ## ✨ 特性
 
 - **清洁架构**: 严格分层架构，关注点分离（infra、logic、web）
-- **领域驱动设计**: 按业务域组织代码（user、role、permission）
+- **领域驱动设计**: 按业务域组织代码（user、role、permission、auth）
 - **依赖注入**: 使用 Wire 进行编译时依赖注入
 - **用户管理**: 完整的 CRUD 操作、状态管理、角色分配
 - **基于角色的访问控制 (RBAC)**: 灵活的权限系统，支持细粒度权限控制
+- **身份认证**: JWT 双令牌认证（access + refresh），bcrypt 密码加密
 - **数据库**: GORM with MySQL 驱动，完整的事务支持
-- **缓存**: RDB 集成，支持缓存和会话管理
-- **身份认证**: 基于 JWT 的身份认证，bcrypt 密码加密
+- **缓存**: Redis 集成，支持缓存和会话管理
+- **配置管理**: Viper 配置管理，支持 YAML 和环境变量
 - **日志记录**: 基于 Zerolog 的高性能结构化日志和请求上下文
 - **监控**: Prometheus 指标收集和 pprof 性能分析
-- **配置管理**: 基于 YAML 的配置系统，支持环境变量覆盖
+- **优雅关闭**: 应用程序优雅关闭和信号处理
 - **Docker**: 生产就绪的 Docker 配置和部署
 - **API 文档**: 完整的 REST API 和标准化响应格式
 - **测试支持**: 集成测试框架和数据库模拟
@@ -48,6 +49,8 @@ go-tpl/
 │   └── monitor/           # 监控和性能分析
 │       └── monitor.go     # Prometheus 指标设置
 ├── logic/                 # 业务逻辑层
+│   ├── auth/              # 认证服务（注册、登录、刷新令牌）
+│   │   └── service.go     # 认证业务逻辑
 │   ├── user/              # 用户域
 │   │   ├── model.go       # 用户数据模型
 │   │   └── service.go     # 用户业务逻辑
@@ -61,6 +64,7 @@ go-tpl/
 │   ├── wire.go            # Wire 依赖注入配置
 │   └── wire_gen.go        # 生成的 Wire 代码
 ├── web/                   # Web 层
+│   ├── app.go             # 应用程序设置和优雅关闭
 │   ├── base/              # 基础工具
 │   │   └── render.go      # 标准化响应渲染
 │   ├── middleware/        # HTTP 中间件
@@ -81,13 +85,14 @@ go-tpl/
 ### 核心组件
 
 - **主入口**: `cmd/run.go` - 应用程序引导，遵循 4 步初始化流程
-- **配置管理**: `infra/config/config.go` - 基于 YAML 的配置，支持环境变量覆盖
+- **配置管理**: `infra/config/config.go` - Viper 配置管理，支持 YAML 和环境变量
 - **数据库层**: GORM with MySQL 驱动，通过 `infra.DB` 访问，支持事务
-- **缓存层**: RDB 客户端，通过 `infra.RDB` 访问
+- **缓存层**: Redis 客户端，通过 `infra.RDB` 访问
 - **日志系统**: 基于 Zerolog 的高性能结构化日志和自定义 logx 工具
 - **依赖注入**: Wire 编译时依赖注入，清晰的依赖流向
 - **监控系统**: Prometheus 指标收集和 pprof 性能分析
-- **身份认证**: JWT-based 认证，bcrypt 密码加密
+- **身份认证**: JWT 双令牌认证（access + refresh），bcrypt 密码加密
+- **应用管理**: `web/app.go` - 应用程序初始化和优雅关闭处理
 - **HTTP 框架**: Gin Web 框架和自定义响应工具
 
 ### 初始化流程
@@ -116,31 +121,33 @@ go-tpl/
 ### 技术栈
 
 #### 核心框架
-- **Go 1.25** - 编程语言
-- **Gin v1.11.0** - HTTP Web 框架
-- **GORM v1.31.1** - ORM 库
+- **Go** - 编程语言 (1.25+)
+- **Gin** - HTTP Web 框架
+- **GORM** - ORM 库
 
 #### 数据存储
 - **MySQL** - 主数据库
-- **RDB v9.16.0** - 缓存和会话存储
-- **GORM MySQL Driver v1.6.0** - MySQL 数据库驱动
+- **Redis** - 缓存和会话存储
+- **GORM MySQL Driver** - MySQL 数据库驱动
 
 #### 身份认证与安全
-- **JWT v5.3.0** - 令牌认证
+- **JWT** - 双令牌认证（access + refresh）
 - **bcrypt** - 密码哈希
+- **RBAC** - 基于角色的访问控制
 
 #### 依赖注入与配置
-- **Wire v0.7.0** - 编译时依赖注入
-- **goccy/go-yaml v1.18.0** - YAML 配置解析
+- **Wire** - 编译时依赖注入
+- **Viper** - 配置管理，支持 YAML 和环境变量
+- **goccy/go-yaml** - YAML 配置解析
 
 #### 日志与监控
-- **Zerolog v1.34.0** - 高性能结构化日志
-- **Prometheus v1.23.2** - 指标收集
-- **fgprof v0.9.5** - 性能分析
+- **Zerolog** - 高性能结构化日志
+- **Prometheus** - 指标收集
+- **fgprof** - 性能分析
 
 #### 测试与开发工具
-- **testify v1.11.1** - 测试框架
-- **go-sqlmock v1.5.2** - 数据库模拟
+- **testify** - 测试框架
+- **go-sqlmock** - 数据库模拟
 - **pprof** - 性能分析
 
 ## 🚀 快速开始
@@ -149,7 +156,7 @@ go-tpl/
 
 - Go 1.25+
 - MySQL 8.0+
-- RDB 6.0+
+- Redis 6.0+
 - Docker（可选）
 
 ### 安装
@@ -210,13 +217,13 @@ database:
 ```
 
 环境变量：
-- `DB_HOST`
-- `DB_PORT`
-- `DB_USER`
-- `DB_PASSWORD`
-- `DB_NAME`
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `DATABASE_USER`
+- `DATABASE_PASSWORD`
+- `DATABASE_NAME`
 
-### RDB 配置
+### Redis 配置
 ```yaml
 redis:
   host: 127.0.0.1
@@ -235,12 +242,14 @@ redis:
 ```yaml
 jwt:
   secret: your-secret-key-change-in-production
-  expire_time: 86400  # 24小时，单位：秒
+  expire_time: 7200        # access_token 过期时间，单位：秒
+  refresh_expire_time: 604800  # refresh_token 过期时间，单位：秒
 ```
 
 环境变量：
 - `JWT_SECRET`
 - `JWT_EXPIRE_TIME`
+- `JWT_REFRESH_EXPIRE_TIME`
 
 ### 服务器配置
 ```yaml
@@ -275,10 +284,83 @@ http://localhost:8080/api
 - `data`: 响应数据（成功时返回具体数据，失败时为 null）
 
 ### 身份认证头
-对于受保护的端点，在 Authorization 头中包含 JWT 令牌：
+对于受保护的端点，在 Authorization 头中包含 JWT access token：
 ```
-Authorization: Bearer <your-jwt-token>
+Authorization: Bearer <your-access-token>
 ```
+
+## 🔐 身份认证 API
+
+### 1. 用户注册
+- **URL**: `POST /api/register`
+- **Method**: `POST`
+- **Body**:
+```json
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "password123"
+}
+```
+- **Response**:
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+### 2. 用户登录
+- **URL**: `POST /api/login`
+- **Method**: `POST`
+- **Body**:
+```json
+{
+  "username": "testuser",
+  "password": "password123"
+}
+```
+- **Response**:
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+### 3. 刷新令牌
+- **URL**: `POST /api/refresh`
+- **Method**: `POST`
+- **Body**:
+```json
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+- **Response**:
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+### 令牌说明
+- **Access Token**: 短期有效（默认 2 小时），用于 API 请求认证
+- **Refresh Token**: 长期有效（默认 7 天），用于获取新的 token 对
+- 当 access token 过期时，使用 refresh token 获取新的 token 对
 
 ## 👥 用户管理 API
 
