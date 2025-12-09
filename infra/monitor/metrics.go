@@ -28,7 +28,7 @@ func init() {
 	prometheus.MustRegister(httpRequestDurationHistogram)
 }
 
-func SetupMetrics(engine *gin.Engine) {
+func RegisterMetrics(engine *gin.Engine) {
 	engine.Use(func(c *gin.Context) {
 		if c.Request.URL.Path == "/metrics" {
 			return

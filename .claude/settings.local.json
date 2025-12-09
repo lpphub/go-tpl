@@ -4,11 +4,7 @@
       "Bash(go mod tidy:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "Bash(tree:*)",
-      "Bash(go build:*)",
-      "Bash(go test:*)",
-      "Bash(go version:*)",
-      "Bash(cmd.exe /c \"echo > nul\")"
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

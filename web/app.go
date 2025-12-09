@@ -29,16 +29,15 @@ func New() *App {
 	}
 
 	app.setupRouter()
-
 	return app
 }
 
 func (a *App) setupRouter() {
 	r := a.Engine
 
-	// 监控服务
-	monitor.SetupMetrics(r)
+	// pprof and metrics
 	//monitor.StartPprof()
+	monitor.RegisterMetrics(r)
 
 	api := r.Group("/api")
 	// 公共中间件
