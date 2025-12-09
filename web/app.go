@@ -55,9 +55,9 @@ func (a *App) setupRouter() {
 	permission.Register(api)
 }
 
-func (a *App) Run() {
+func (a *App) Run(addr string) {
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    addr,
 		Handler: a.Engine,
 	}
 	go func() {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go-tpl/infra"
 	"go-tpl/logic"
 	"go-tpl/web"
@@ -14,5 +15,5 @@ func main() {
 
 	// 3.配置并启动web
 	app := web.New()
-	app.Run()
+	app.Run(fmt.Sprintf(":%d", infra.Cfg.Server.Port))
 }
