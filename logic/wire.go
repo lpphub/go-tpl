@@ -7,6 +7,7 @@ package logic
 
 import (
 	"go-tpl/infra"
+	"go-tpl/logic/auth"
 	"go-tpl/logic/permission"
 	"go-tpl/logic/role"
 	"go-tpl/logic/user"
@@ -15,6 +16,7 @@ import (
 )
 
 type Service struct {
+	Auth       *auth.Service
 	User       *user.Service
 	Role       *role.Service
 	Permission *permission.Service
@@ -29,6 +31,7 @@ var svcSet = wire.NewSet(
 	user.NewService,
 	role.NewService,
 	permission.NewService,
+	auth.NewService,
 )
 
 func initialize() *Service {

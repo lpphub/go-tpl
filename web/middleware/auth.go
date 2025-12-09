@@ -15,8 +15,8 @@ const (
 	UserIDKey           = "user_id"
 )
 
-// JWTAuth JWT 认证中间件
-func JWTAuth() gin.HandlerFunc {
+// TokenAuth JWT-Token 认证中间件
+func TokenAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从 Header 中获取 token
 		authHeader := c.GetHeader(AuthorizationHeader)
@@ -41,6 +41,12 @@ func JWTAuth() gin.HandlerFunc {
 		// 解析 token
 		claims, err := jwt.ParseToken(tokenString)
 		if err != nil {
+			base.FailWithError(c, shared.ErrInvalidToken)
+			return
+		}
+
+		// 验证是否为 access token
+		if claims.Type != jwt.AccessTokenType {
 			base.FailWithError(c, shared.ErrInvalidToken)
 			return
 		}

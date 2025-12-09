@@ -9,6 +9,7 @@ package logic
 import (
 	"github.com/google/wire"
 	"go-tpl/infra"
+	"go-tpl/logic/auth"
 	"go-tpl/logic/permission"
 	"go-tpl/logic/role"
 	"go-tpl/logic/user"
@@ -20,9 +21,11 @@ func initialize() *Service {
 	db := infra.ProvideDB()
 	client := infra.ProvideRDB()
 	service := user.NewService(db, client)
+	authService := auth.NewService(service)
 	roleService := role.NewService(db)
 	permissionService := permission.NewService(db)
 	logicService := &Service{
+		Auth:       authService,
 		User:       service,
 		Role:       roleService,
 		Permission: permissionService,
@@ -33,6 +36,7 @@ func initialize() *Service {
 // wire.go:
 
 type Service struct {
+	Auth       *auth.Service
 	User       *user.Service
 	Role       *role.Service
 	Permission *permission.Service
@@ -40,4 +44,4 @@ type Service struct {
 
 var providerSet = wire.NewSet(infra.ProvideDB, infra.ProvideRDB)
 
-var svcSet = wire.NewSet(user.NewService, role.NewService, permission.NewService)
+var svcSet = wire.NewSet(user.NewService, role.NewService, permission.NewService, auth.NewService)

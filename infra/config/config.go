@@ -22,8 +22,9 @@ type RedisConfig struct {
 }
 
 type JWTConfig struct {
-	Secret     string
-	ExpireTime int64 // 过期时间（秒）
+	Secret           string
+	ExpireTime       int64 // access_token 过期时间（秒）
+	RefreshExpireTime int64 // refresh_token 过期时间（秒）
 }
 
 type ServerConfig struct {

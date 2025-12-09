@@ -1,8 +1,6 @@
 package rest
 
 import (
-	"errors"
-	"go-tpl/infra/jwt"
 	"go-tpl/infra/logger"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
@@ -19,8 +17,6 @@ func Test(c *gin.Context) {
 
 	logger.Info(c.Request.Context(), "test3")
 
-	logger.Errw(c, errors.New("test"))
-
 	base.OKWithData(c, "ok")
 }
 
@@ -31,29 +27,13 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// 创建用户
-	user, err := logic.Svc.User.Create(c, types.CreateUserReq{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: req.Password,
-	})
+	// 使用auth service注册
+	tokenPair, err := logic.Svc.Auth.Register(c, req)
 	if err != nil {
 		base.FailWithError(c, err)
 		return
 	}
-
-	// 生成 token
-	token, err := jwt.GenerateToken(user.ID)
-	if err != nil {
-		logger.Errw(c, err)
-		base.Fail(c, 500, "生成token失败")
-		return
-	}
-
-	base.OKWithData(c, gin.H{
-		"token": token,
-		"user":  user,
-	})
+	base.OKWithData(c, tokenPair)
 }
 
 func Login(c *gin.Context) {
@@ -63,23 +43,31 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 验证用户名和密码
-	user, err := logic.Svc.User.ValidateLogin(c, req.Username, req.Password)
+	// 使用auth service登录
+	tokenPair, err := logic.Svc.Auth.Login(c, req)
 	if err != nil {
 		base.FailWithError(c, err)
 		return
 	}
 
-	// 生成 token
-	token, err := jwt.GenerateToken(user.ID)
-	if err != nil {
-		logger.Errw(c, err)
-		base.Fail(c, 500, "生成token失败")
+	base.OKWithData(c, tokenPair)
+}
+
+// RefreshToken 刷新 token
+func RefreshToken(c *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		base.FailWithError(c, shared.ErrInvalidParam)
 		return
 	}
 
-	base.OKWithData(c, gin.H{
-		"token": token,
-		"user":  user,
-	})
+	// 使用auth service刷新token
+	tokenPair, err := logic.Svc.Auth.RefreshToken(c, req.RefreshToken)
+	if err != nil {
+		base.FailWithError(c, err)
+		return
+	}
+	base.OKWithData(c, tokenPair)
 }

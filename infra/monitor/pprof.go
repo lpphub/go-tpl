@@ -7,7 +7,7 @@ import (
 	"github.com/felixge/fgprof"
 )
 
-func SetupPprof() {
+func StartPprof() {
 	http.DefaultServeMux.Handle("/debug/fgprof", fgprof.Handler())
 
 	go func() {
