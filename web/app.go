@@ -3,8 +3,11 @@ package web
 import (
 	"context"
 	"errors"
+	"fmt"
+	"go-tpl/infra"
 	"go-tpl/infra/logger/logx"
 	"go-tpl/infra/monitor"
+	"go-tpl/logic"
 	"go-tpl/web/rest"
 	"go-tpl/web/rest/permission"
 	"go-tpl/web/rest/role"
@@ -27,9 +30,44 @@ func New() *App {
 	app := &App{
 		Engine: gin.Default(),
 	}
-
-	app.setupRouter()
 	return app
+}
+
+func (a *App) Init() {
+	// 1.初始化基础设施
+	infra.Init()
+	// 2.初始化逻辑层
+	logic.Init()
+
+	// 3.配置web路由
+	a.setupRouter()
+}
+
+func (a *App) Run() {
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", infra.Cfg.Server.Port),
+		Handler: a.Engine,
+	}
+	go func() {
+		log.Printf("Server starting on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
+	} else {
+		log.Println("Server shutdown completed")
+	}
 }
 
 func (a *App) setupRouter() {
@@ -53,31 +91,4 @@ func (a *App) setupRouter() {
 	user.Register(api)
 	role.Register(api)
 	permission.Register(api)
-}
-
-func (a *App) Run(addr string) {
-	srv := &http.Server{
-		Addr:    addr,
-		Handler: a.Engine,
-	}
-	go func() {
-		log.Printf("Server starting on %s", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Failed to start server: %v", err)
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("Server forced to shutdown: %v", err)
-	} else {
-		log.Println("Server shutdown completed")
-	}
 }
