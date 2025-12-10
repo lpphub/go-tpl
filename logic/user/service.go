@@ -233,19 +233,19 @@ func (s *Service) ValidateLogin(ctx context.Context, username, password string) 
 	var user User
 	if err := s.db.WithContext(ctx).Where("username = ?", username).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, shared.NewError(2104, "用户名或密码错误")
+			return nil, shared.ErrLoginFailed
 		}
 		return nil, err
 	}
 
 	// 检查用户状态
 	if user.Status != shared.StatusActive {
-		return nil, shared.NewError(2105, "用户已被禁用")
+		return nil, shared.ErrUserDisabled
 	}
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, shared.NewError(2104, "用户名或密码错误")
+		return nil, shared.ErrLoginFailed
 	}
 
 	return &user, nil
