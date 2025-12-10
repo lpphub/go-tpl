@@ -217,7 +217,7 @@ type Config struct {
 }
 
 // Access configuration
-func main() {
+func Serve() {
     cfg, err := config.Load()
     if err != nil {
         log.Fatal(err)

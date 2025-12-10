@@ -1,10 +1,10 @@
-package main
+package cmd
 
 import (
 	"go-tpl/web"
 )
 
-func main() {
+func Serve() {
 	app := web.New()
 	// 初始化资源
 	app.Init()
