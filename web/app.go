@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go-tpl/infra"
-	"go-tpl/infra/logger/logx"
-	"go-tpl/infra/monitor"
 	"go-tpl/logic"
 	"go-tpl/web/rest"
 	"go-tpl/web/rest/permission"
@@ -20,6 +18,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lpphub/goweb/ext/logger/logx"
+	"github.com/lpphub/goweb/monitor"
 )
 
 type App struct {
@@ -44,6 +44,29 @@ func (a *App) init() {
 
 	// 3.配置web路由
 	a.setupRouter()
+}
+
+func (a *App) setupRouter() {
+	r := a.engine
+
+	// pprof and metrics
+	//monitor.StartPprof()
+	monitor.RegisterMetrics(r)
+
+	api := r.Group("/api")
+	// 公共中间件
+	api.Use(logx.GinLogMiddleware())
+
+	// 公共路由
+	api.GET("/test", rest.Test)
+	api.POST("/register", rest.Register)
+	api.POST("/login", rest.Login)
+	api.POST("/refresh", rest.RefreshToken)
+
+	// 注册接口处理
+	user.Register(api)
+	role.Register(api)
+	permission.Register(api)
 }
 
 func (a *App) Run() {
@@ -71,27 +94,4 @@ func (a *App) Run() {
 	} else {
 		log.Println("Server shutdown completed")
 	}
-}
-
-func (a *App) setupRouter() {
-	r := a.engine
-
-	// pprof and metrics
-	//monitor.StartPprof()
-	monitor.RegisterMetrics(r)
-
-	api := r.Group("/api")
-	// 公共中间件
-	api.Use(logx.GinLogMiddleware())
-
-	// 公共路由
-	api.GET("/test", rest.Test)
-	api.POST("/register", rest.Register)
-	api.POST("/login", rest.Login)
-	api.POST("/refresh", rest.RefreshToken)
-
-	// 注册接口处理
-	user.Register(api)
-	role.Register(api)
-	permission.Register(api)
 }

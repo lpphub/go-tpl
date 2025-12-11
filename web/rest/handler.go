@@ -1,13 +1,13 @@
 package rest
 
 import (
-	"go-tpl/infra/logger"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
-	"go-tpl/web/base"
 	"go-tpl/web/types"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lpphub/goweb/base"
+	"github.com/lpphub/goweb/ext/logger"
 )
 
 func Test(c *gin.Context) {

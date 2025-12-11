@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"go-tpl/infra/config"
 	"go-tpl/infra/dbs"
-	"go-tpl/infra/logger"
 
+	"github.com/lpphub/goweb/ext/logger"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )

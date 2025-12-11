@@ -1,14 +1,14 @@
 package role
 
 import (
-	"go-tpl/infra/logger"
 	"go-tpl/logic"
 	"go-tpl/logic/shared"
-	"go-tpl/web/base"
 	"go-tpl/web/types"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lpphub/goweb/base"
+	"github.com/lpphub/goweb/ext/logger"
 )
 
 // List 获取角色列表

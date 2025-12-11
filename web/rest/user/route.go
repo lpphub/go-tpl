@@ -7,7 +7,7 @@ import (
 )
 
 func Register(router *gin.RouterGroup) {
-	r := router.Group("/user").Use(middleware.TokenAuth())
+	r := router.Group("/user").Use(middleware.JwtAuth())
 	{
 		r.POST("/list", List)              // 获取用户列表
 		r.GET("/:id", Get)                 // 获取单个用户

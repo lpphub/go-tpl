@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"errors"
-	"go-tpl/infra/logger"
 	"go-tpl/logic/shared"
 	"go-tpl/web/types"
 
+	"github.com/lpphub/goweb/ext/logger"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/redis/go-redis/v9"

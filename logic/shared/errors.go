@@ -1,5 +1,7 @@
 package shared
 
+import "github.com/lpphub/goweb/base"
+
 var (
 	// 系统错误
 	ErrServerError = NewError(500, "server internal error")
@@ -20,18 +22,9 @@ var (
 	ErrPermissionExists = NewError(2120, "权限已存在")
 )
 
-type Error struct {
-	Code int
-	Msg  string
-}
-
-func NewError(code int, msg string) Error {
-	return Error{
+func NewError(code int, msg string) base.Error {
+	return base.Error{
 		Code: code,
 		Msg:  msg,
 	}
-}
-
-func (err Error) Error() string {
-	return err.Msg
 }

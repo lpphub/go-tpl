@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"go-tpl/infra/config"
-	"go-tpl/infra/logger/logx"
 	"time"
 
+	"github.com/lpphub/goweb/ext/logger/logx"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
