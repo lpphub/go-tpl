@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"fmt"
+	"go-tpl/infra"
 	"sync"
 
 	"github.com/lpphub/goweb/ext/jwt"
@@ -20,9 +21,9 @@ var (
 func useJwt() *jwt.Manager {
 	once.Do(func() {
 		jm, _ = jwt.NewManager(jwt.Config{
-			Secret:           "12344aaa",
-			AccessExpireSec:  0,
-			RefreshExpireSec: 0,
+			Secret:           infra.Cfg.JWT.Secret,
+			AccessExpireSec:  infra.Cfg.JWT.ExpireTime,
+			RefreshExpireSec: infra.Cfg.JWT.RefreshExpireTime,
 		})
 	})
 	return jm
