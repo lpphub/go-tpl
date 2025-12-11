@@ -6,10 +6,8 @@ import (
 	"go-tpl/logic/shared"
 	"go-tpl/web/types"
 
-	"github.com/lpphub/goweb/ext/logger"
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,9 +29,6 @@ func (s *Service) List(ctx context.Context, req types.UserQueryReq) (*shared.Pag
 		total int64
 		list  []User
 	)
-
-	get := s.redis.Get(ctx, "user_list")
-	logger.Info(ctx, "get rdb: "+get.String())
 
 	_db := s.db.WithContext(ctx).Model(&User{})
 	if req.Username != "" {
