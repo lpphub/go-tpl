@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
-
 	"go-tpl/infra/jwt"
+
 	"go-tpl/logic/user"
 	"go-tpl/web/types"
 )

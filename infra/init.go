@@ -2,8 +2,6 @@ package infra
 
 import (
 	"fmt"
-	"go-tpl/infra/config"
-	"go-tpl/infra/dbs"
 
 	"github.com/lpphub/goweb/ext/logger"
 	"github.com/redis/go-redis/v9"
@@ -11,7 +9,7 @@ import (
 )
 
 var (
-	Cfg *config.Config
+	Cfg *Config
 	DB  *gorm.DB
 	RDB *redis.Client
 )
@@ -19,7 +17,7 @@ var (
 func Init() {
 	var err error
 	// 1.加载配置
-	Cfg, err = config.Load()
+	Cfg, err = LoadConfig()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to load config: %v", err))
 	}
@@ -28,12 +26,12 @@ func Init() {
 	logger.Init()
 
 	// 3.初始化数据库和Redis
-	DB, err = dbs.NewMysqlDB(Cfg.Database)
+	DB, err = NewMysqlDB(Cfg.Database)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	RDB, err = dbs.NewRedis(Cfg.Redis)
+	RDB, err = NewRedis(Cfg.Redis)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to redis: %v", err))
 	}

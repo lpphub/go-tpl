@@ -1,7 +1,10 @@
 package main
 
-import "go-tpl/cmd"
+import (
+	"go-tpl/web"
+)
 
 func main() {
-	cmd.Serve()
+	app := web.New()
+	app.Run()
 }

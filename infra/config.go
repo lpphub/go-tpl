@@ -1,4 +1,4 @@
-package config
+package infra
 
 import (
 	conf "github.com/lpphub/goweb/ext/config"
@@ -37,6 +37,6 @@ type Config struct {
 	Server   ServerConfig
 }
 
-func Load() (*Config, error) {
+func LoadConfig() (*Config, error) {
 	return conf.Load[Config]("./config", "conf", "yml")
 }
