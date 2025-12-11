@@ -174,8 +174,8 @@ go mod tidy
 
 3. **配置应用程序**
 ```bash
-cp config/conf.yml.example config/conf.yml
-# 编辑 config/conf.yml 设置您的数据库和 RDB 配置
+cp config/config.yml.example config/config.yml
+# 编辑 config/config.yml 设置您的数据库和 RDB 配置
 ```
 
 4. **运行应用程序**

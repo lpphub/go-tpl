@@ -42,7 +42,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	return load[Config]("./config", "conf", "yml")
+	return load[Config]("./config", "config", "yml")
 }
 
 func load[T any](configPath, configName, configType string) (*T, error) {
