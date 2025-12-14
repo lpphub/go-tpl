@@ -93,6 +93,7 @@ github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
 github.com/lpphub/goweb v0.0.1 h1:KL9eAPED3Xb7OJtIyMtwHjbxanRzJPfRBItXjtlZVe0=
 github.com/lpphub/goweb v0.0.1/go.mod h1:Uzjh4Zwznf0gVLJ+jc5DdLlg1M2/7kv1LKECmcRXCqw=
+github.com/lpphub/goweb v0.0.2/go.mod h1:Uzjh4Zwznf0gVLJ+jc5DdLlg1M2/7kv1LKECmcRXCqw=
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
