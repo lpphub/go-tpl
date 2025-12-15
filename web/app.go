@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lpphub/goweb/ext/logger/logx"
+	"github.com/lpphub/goweb/ext/logx"
 	"github.com/lpphub/goweb/monitor"
 )
 

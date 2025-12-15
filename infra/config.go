@@ -1,7 +1,7 @@
 package infra
 
 import (
-	conf "github.com/lpphub/goweb/ext/config"
+	conf "github.com/lpphub/goweb/pkg/config"
 )
 
 type DBConfig struct {

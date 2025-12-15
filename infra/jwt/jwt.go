@@ -5,7 +5,7 @@ import (
 	"go-tpl/infra"
 	"sync"
 
-	"github.com/lpphub/goweb/ext/jwt"
+	"github.com/lpphub/goweb/pkg/jwt"
 )
 
 type (
